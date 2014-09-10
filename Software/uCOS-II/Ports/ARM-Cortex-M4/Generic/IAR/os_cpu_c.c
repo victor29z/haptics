@@ -414,8 +414,9 @@ OS_STK *OSTaskStkInit (void (*task)(void *p_arg), void *p_arg, OS_STK *ptos, INT
                                                                 /* Registers stacked as if auto-saved on exception      */
     *(--p_stk) = (OS_STK)0x01000000uL;                          /* xPSR                                                 */
     *(--p_stk) = (OS_STK)task;                                  /* Entry Point                                          */
-    *(--p_stk) = (OS_STK)OS_TaskReturn;                         /* R14 (LR)                                             */
-    *(--p_stk) = (OS_STK)0x12121212uL;                          /* R12                                                  */
+    //*(--p_stk) = (OS_STK)OS_TaskReturn;                         /* R14 (LR)                                             */
+	*(--p_stk) = (OS_STK)0xFFFFFFFEuL;                         /* R14 (LR)                                             */
+	*(--p_stk) = (OS_STK)0x12121212uL;                          /* R12                                                  */
     *(--p_stk) = (OS_STK)0x03030303uL;                          /* R3                                                   */
     *(--p_stk) = (OS_STK)0x02020202uL;                          /* R2                                                   */
     *(--p_stk) = (OS_STK)0x01010101uL;                          /* R1                                                   */
@@ -577,16 +578,16 @@ void  OSTimeTickHook (void)
 
 void  OS_CPU_SysTickHandler (void)
 {
-    OS_CPU_SR  cpu_sr;
+/*    OS_CPU_SR  cpu_sr;
 
 
-    OS_ENTER_CRITICAL();                                        /* Tell uC/OS-II that we are starting an ISR            */
+    OS_ENTER_CRITICAL();
     OSIntNesting++;
     OS_EXIT_CRITICAL();
 
-    OSTimeTick();                                               /* Call uC/OS-II's OSTimeTick()                         */
+    OSTimeTick();      
 
-    OSIntExit();                                                /* Tell uC/OS-II that we are leaving the ISR            */
+    OSIntExit();*/
 }
 
 
@@ -604,21 +605,21 @@ void  OS_CPU_SysTickHandler (void)
 
 void  OS_CPU_SysTickInit (INT32U  cnts)
 {
-    INT32U  prio;
+/*    INT32U  prio;
 
 
     OS_CPU_CM4_NVIC_ST_RELOAD = cnts - 1u;
 
-                                                                /* Set SysTick handler prio.                            */
+                                                                // Set SysTick handler prio.                            
     prio  = OS_CPU_CM4_NVIC_SHPRI3;
     prio &= DEF_BIT_FIELD(24, 0);
     prio |= DEF_BIT_MASK(OS_CPU_CFG_SYSTICK_PRIO, 24);
 
     OS_CPU_CM4_NVIC_SHPRI3 = prio;
 
-                                                                /* Enable timer.                                        */
+                                                                // Enable timer.                                     
     OS_CPU_CM4_NVIC_ST_CTRL |= OS_CPU_CM4_NVIC_ST_CTRL_CLK_SRC |
                                OS_CPU_CM4_NVIC_ST_CTRL_ENABLE;
-                                                                /* Enable timer interrupt.                              */
-    OS_CPU_CM4_NVIC_ST_CTRL |= OS_CPU_CM4_NVIC_ST_CTRL_INTEN;
+                                                                // Enable timer interrupt.                         
+    OS_CPU_CM4_NVIC_ST_CTRL |= OS_CPU_CM4_NVIC_ST_CTRL_INTEN;*/
 }

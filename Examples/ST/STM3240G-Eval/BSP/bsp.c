@@ -122,6 +122,7 @@
 static  void  BSP_LED_Init        (void);
 
 
+
 /*
 *********************************************************************************************************
 *                                               BSP_Init()
@@ -149,7 +150,7 @@ static  void  BSP_LED_Init        (void);
 
 void  BSP_Init (void)
 {
-    BSP_IntInit();
+//    BSP_IntInit();//set vector table
     
     RCC_DeInit();
     RCC_HSEConfig(RCC_HSE_ON);                                  /* HSE = 25MHz ext. crystal.                            */
@@ -191,6 +192,13 @@ void  BSP_Init (void)
 #endif
 }
 
+void systick_init(void) 
+{ 
+        RCC_ClocksTypeDef  rcc_clocks; 
+        RCC_GetClocksFreq(&rcc_clocks);   //调用标准库函数，获取系统时钟。
+        SysTick_Config(rcc_clocks.HCLK_Frequency / OS_TICKS_PER_SEC); //初始化并使能SysTick
+										          //OS_TICKS_PER_SEC是在os_cfg.h中定义的
+}
 
 /*
 *********************************************************************************************************

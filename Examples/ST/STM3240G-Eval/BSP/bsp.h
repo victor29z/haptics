@@ -73,7 +73,7 @@
 #include  <lib_ascii.h>
 
 #include  <stm32f4xx_gpio.h>
-
+#include "core_cm4.h"
 /*
 *********************************************************************************************************
 *                                               CONSTANTS
@@ -290,6 +290,7 @@ void        BSP_IntDisAll                     (void);
 CPU_INT32U  BSP_CPU_ClkFreq                   (void);
 
 void        BSP_Tick_Init                     (void);
+void systick_init(void) ;
 
 
 /*

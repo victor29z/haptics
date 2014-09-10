@@ -168,7 +168,9 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state></state>
+          <state>USE_STDPERIPH_DRIVER</state>
+          <state>STM32F40_41xxx</state>
+          <state>USE_STM324xG_EVAL</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -300,7 +302,8 @@
           <state>$PROJ_DIR$\..\</state>
           <state>$PROJ_DIR$\..\..\BSP\</state>
           <state>$PROJ_DIR$\..\..\BSP\OS\uCOS-II\</state>
-          <state>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\</state>
+          <state>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\inc\</state>
+          <state>$PROJ_DIR$\..\..\BSP\ST\CMSIS\Include\</state>
           <state>$PROJ_DIR$\..\..\..\..\..\Software\uC-CPU\</state>
           <state>$PROJ_DIR$\..\..\..\..\..\Software\uC-CPU\ARM-Cortex-M4\IAR\</state>
           <state>$PROJ_DIR$\..\..\..\..\..\Software\uC-LIB\</state>
@@ -993,6 +996,9 @@
     <file>
       <name>$PROJ_DIR$\..\stm32f4xx_conf.h</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\..\stm32f4xx_it.c</name>
+    </file>
   </group>
   <group>
     <name>BSP</name>
@@ -1000,9 +1006,18 @@
       <name>IAR</name>
       <file>
         <name>$PROJ_DIR$\..\..\BSP\IAR\cstartup.c</name>
+        <excluded>
+          <configuration>FLASH</configuration>
+        </excluded>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\startup_stm32f40_41xxx.s</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\BSP\IAR\STM32F4xx_FLASH.icf</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\system_stm32f4xx.c</name>
       </file>
     </group>
     <group>
@@ -1018,187 +1033,52 @@
       </group>
     </group>
     <group>
-      <name>ST</name>
-      <group>
-        <name>STM32F4xx</name>
-        <group>
-          <name>inc</name>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\misc.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_adc.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_can.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_crc.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_cryp.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_dac.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_dbgmcu.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_dcmi.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_dma.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_exti.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_flash.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_fsmc.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_gpio.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_hash.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_i2c.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_iwdg.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_pwr.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_rcc.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_rng.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_rtc.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_sdio.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_spi.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_syscfg.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_tim.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_usart.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\inc\stm32f4xx_wwdg.h</name>
-          </file>
-        </group>
-        <group>
-          <name>src</name>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\misc.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_adc.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_can.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_crc.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_cryp.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_cryp_aes.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_cryp_des.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_cryp_tdes.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_dac.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_dbgmcu.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_dcmi.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_dma.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_exti.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_flash.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_fsmc.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_gpio.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_hash.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_hash_md5.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_hash_sha1.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_i2c.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_iwdg.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_pwr.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_rcc.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_rng.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_rtc.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_sdio.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_spi.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_syscfg.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_tim.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_usart.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx\src\stm32f4xx_wwdg.c</name>
-          </file>
-        </group>
-      </group>
+      <name>STM32F4xx_StdPeriph_Driver</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\misc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_adc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_can.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_dbgmcu.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_dma.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_exti.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_flash.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_fsmc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_gpio.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_pwr.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_rcc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_spi.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_syscfg.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_tim.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\BSP\ST\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_usart.c</name>
+      </file>
     </group>
     <file>
       <name>$PROJ_DIR$\..\..\BSP\bsp.c</name>

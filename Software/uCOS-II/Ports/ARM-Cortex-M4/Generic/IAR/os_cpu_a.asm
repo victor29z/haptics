@@ -39,7 +39,7 @@
     PUBLIC  OSStartHighRdy
     PUBLIC  OSCtxSw
     PUBLIC  OSIntCtxSw
-    PUBLIC  OS_CPU_PendSVHandler
+    PUBLIC  PendSV_Handler
     
 #ifdef __ARMVFP__  
     PUBLIC  OS_CPU_FP_Reg_Push
@@ -266,7 +266,7 @@ OSIntCtxSw
 ;              therefore safe to assume that context being switched out was using the process stack (PSP).
 ;********************************************************************************************************
 
-OS_CPU_PendSVHandler
+PendSV_Handler
     CPSID   I                                                   ; Prevent interruption during context switch
     MRS     R0, PSP                                             ; PSP is process stack pointer
     CBZ     R0, OS_CPU_PendSVHandler_nosave                     ; Skip register save the first time
