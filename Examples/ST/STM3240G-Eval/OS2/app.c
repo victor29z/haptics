@@ -64,8 +64,6 @@ CPU_INT32U  AppProbe_Slider;
 */
 
 static  void  AppTaskStart          (void  *p_arg);
-static  void  AppTaskCreate         (void);
-static  void  AppObjCreate          (void);
 
 /*
 *********************************************************************************************************
@@ -173,46 +171,5 @@ static  void  AppTaskStart (void *p_arg)
         
     }
 }
-
-/*
-*********************************************************************************************************
-*                                          AppTaskCreate()
-*
-* Description : Create Application Tasks.
-*
-* Argument(s) : none
-*
-* Return(s)   : none
-*
-* Caller(s)   : AppTaskStart()
-*
-* Note(s)     : none.
-*********************************************************************************************************
-*/
-
-static  void  AppTaskCreate (void)
-{
-}
-
-
-/*
-*********************************************************************************************************
-*                                          AppObjCreate()
-*
-* Description : Create Application Kernel Objects.
-*
-* Argument(s) : none
-*
-* Return(s)   : none
-*
-* Caller(s)   : AppTaskStart()
-*
-* Note(s)     : none.
-*********************************************************************************************************
-*/
-static  void  AppObjCreate (void)
-{
-}
-
 
 
