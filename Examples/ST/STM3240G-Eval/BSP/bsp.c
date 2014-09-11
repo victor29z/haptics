@@ -46,7 +46,7 @@
 *********************************************************************************************************
 */
 
-#define  BSP_BIT_RCC_PLLCFGR_PLLM               25u
+#define  BSP_BIT_RCC_PLLCFGR_PLLM               8u
 #define  BSP_BIT_RCC_PLLCFGR_PLLN              336u
 #define  BSP_BIT_RCC_PLLCFGR_PLLP                2u
 #define  BSP_BIT_RCC_PLLCFGR_PLLQ                7u
@@ -119,7 +119,7 @@
 *********************************************************************************************************
 */
 
-static  void  BSP_LED_Init        (void);
+
 
 
 
@@ -183,7 +183,6 @@ void  BSP_Init (void)
         ;
     }
     
-    BSP_LED_Init();                                             /* Init LEDs.                                           */
     
 #ifdef TRACE_EN                                                 /* See project / compiler preprocessor options.         */
     BSP_CPU_REG_DBGMCU_CR |=  BSP_DBGMCU_CR_TRACE_IOEN_MASK;    /* Enable tracing (see Note #2).                        */
@@ -280,7 +279,7 @@ void BSP_Tick_Init (void)
 *********************************************************************************************************
 */
 
-static void  BSP_LED_Init()
+void  BSP_LED_Init(void)
 {
     GPIO_InitTypeDef  gpio_init;
 

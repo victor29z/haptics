@@ -135,7 +135,9 @@ static  void  AppTaskStart (void *p_arg)
    (void)p_arg;
 
     BSP_Init();                                                 /* Initialize BSP functions                             */
-    systick_init();                                            /* Start Tick Initialization                            */
+	BSP_LED_Init();                                             /* Init LEDs.                                           */
+    
+	systick_init();                                            /* Start Tick Initialization                            */
 
 #if OS_CFG_STAT_TASK_EN > 0u
     OSStatTaskCPUUsageInit(&err);                               /* Compute CPU capacity with no task running            */
@@ -161,7 +163,7 @@ static  void  AppTaskStart (void *p_arg)
     
     while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
         BSP_LED_Toggle(0u);
-		OSTimeDly(500);
+		OSTimeDly(50);
         //OSTimeDlyHMSM(0u, 0u, 0u, (AppProbe_Slider));
         //AppProbe_CtrVal++;
         /*

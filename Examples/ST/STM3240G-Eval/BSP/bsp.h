@@ -291,6 +291,7 @@ CPU_INT32U  BSP_CPU_ClkFreq                   (void);
 
 void        BSP_Tick_Init                     (void);
 void systick_init(void) ;
+void  BSP_LED_Init(void);
 
 
 /*

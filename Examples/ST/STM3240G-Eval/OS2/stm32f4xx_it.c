@@ -140,11 +140,11 @@ void PendSV_Handler(void)
   * @param  None
   * @retval None
   */
+
 void SysTick_Handler(void)
 {
 	OS_CPU_SR  cpu_sr;
-
-	OSIntEnter();
+	
 	OS_ENTER_CRITICAL();
 	OSIntNesting++;
 	OS_EXIT_CRITICAL();
