@@ -277,9 +277,50 @@
 #define  BSP_PERIPH_ID_TIM10                             145u
 #define  BSP_PERIPH_ID_TIM11                             146u
 
+/*
+*********************************************************************************************************
+*                                             UART DEFINES
+*********************************************************************************************************
+*/
+
 #define __bsp_uart_console	2	//usart3
 
 
+/*
+*********************************************************************************************************
+*                                             CH378 DEFINES
+*********************************************************************************************************
+*/
+
+#define CH378_INT_PORT		GPIOG
+#define CH378_INT_PIN		GPIO_Pin_1
+
+#define CH378_A0_PORT		GPIOH
+#define CH378_A0_PIN		GPIO_Pin_5
+
+#define CH378_nRD_PORT		GPIOA
+#define CH378_nRD_PIN		GPIO_Pin_4
+
+#define CH378_nWR_PORT		GPIOA
+#define CH378_nWR_PIN		GPIO_Pin_6
+
+#define CH378_nPCS_PORT		GPIOB
+#define CH378_nPCS_PIN		GPIO_Pin_2
+
+#define CH378_SET_A0()			GPIO_SetBits(CH378_A0_PORT,CH378_A0_PIN)
+#define CH378_RESET_A0()		GPIO_ResetBits(CH378_A0_PORT,CH378_A0_PIN)
+
+#define CH378_SET_nRD()			GPIO_SetBits(CH378_nRD_PORT,CH378_nRD_PIN)
+#define CH378_RESET_nRD()		GPIO_ResetBits(CH378_nRD_PORT,CH378_nRD_PIN)
+
+#define CH378_SET_nWR()			GPIO_SetBits(CH378_nWR_PORT,CH378_nWR_PIN)
+#define CH378_RESET_nWR()		GPIO_ResetBits(CH378_nWR_PORT,CH378_nWR_PIN)
+
+#define CH378_SET_nPCS()		GPIO_SetBits(CH378_nPCS_PORT,CH378_nPCS_PIN)
+#define CH378_RESET_nPCS()		GPIO_ResetBits(CH378_nPCS_PORT,CH378_nPCS_PIN)
+
+#define CH378_WRITE_DB(dat)		do{u16 temp = GPIOF->ODR&0xff00;temp+=dat;GPIOF->ODR=temp;}while(0)
+#define CH378_READ_DB()			((GPIOF->IDR)&0xff)
 
 /*
 *********************************************************************************************************

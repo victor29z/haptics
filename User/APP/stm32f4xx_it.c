@@ -31,6 +31,7 @@
 #include "stm32f4xx_it.h"
 #include "ucos_ii.h"
 #include "drivers.h"
+#include "ch378.h"
 /** @addtogroup Template_Project
   * @{
   */
@@ -184,6 +185,16 @@ void UART5_IRQHandler(void)
 	OSIntEnter();
 	serial_isr(4);
 	OSIntExit();    
+}
+
+void EXTI1_IRQHandler(void)
+{
+	if(EXTI_GetITStatus(EXTI_Line1) != RESET)
+	{
+		/* Clear the EXTI line 1 pending bit */
+		EXTI_ClearITPendingBit(EXTI_Line1);
+		mCH378Interrupt();
+	}
 }
 
 

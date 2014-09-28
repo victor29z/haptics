@@ -119,6 +119,7 @@
 *********************************************************************************************************
 */
 
+static void  CH378_Port_Init(void);
 
 
 
@@ -182,7 +183,7 @@ void  BSP_Init (void)
     while (RCC_GetSYSCLKSource() != RCC_CFGR_SWS_PLL) {
         ;
     }
-    
+    CH378_Port_Init();
     
 #ifdef TRACE_EN                                                 /* See project / compiler preprocessor options.         */
     BSP_CPU_REG_DBGMCU_CR |=  BSP_DBGMCU_CR_TRACE_IOEN_MASK;    /* Enable tracing (see Note #2).                        */
@@ -196,7 +197,6 @@ void systick_init(void)
         RCC_ClocksTypeDef  rcc_clocks; 
         RCC_GetClocksFreq(&rcc_clocks);   //调用标准库函数，获取系统时钟。
         SysTick_Config(rcc_clocks.HCLK_Frequency / OS_TICKS_PER_SEC); //初始化并使能SysTick
-										          //OS_TICKS_PER_SEC是在os_cfg.h中定义的
 }
 
 /*
@@ -454,6 +454,97 @@ void  BSP_LED_Toggle (CPU_INT08U  led)
         default:
              break;
     }
+}
+
+
+static void  CH378_Port_Init(void)
+{
+    GPIO_InitTypeDef  gpio_init;
+
+    BSP_PeriphEn(BSP_PERIPH_ID_GPIOH);
+	BSP_PeriphEn(BSP_PERIPH_ID_GPIOA);
+	BSP_PeriphEn(BSP_PERIPH_ID_GPIOG);
+	BSP_PeriphEn(BSP_PERIPH_ID_GPIOB);
+	BSP_PeriphEn(BSP_PERIPH_ID_GPIOF);
+	// data bus PF0-PF7
+    gpio_init.GPIO_Pin   = 	   GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3
+							 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+    gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
+    gpio_init.GPIO_OType = GPIO_OType_OD;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+
+    GPIO_Init(GPIOF, &gpio_init);
+	CH378_WRITE_DB(0xff);
+	// INT
+	gpio_init.GPIO_Pin   = CH378_INT_PIN;
+    gpio_init.GPIO_Mode  = GPIO_Mode_IN;
+//	gpio_init.GPIO_OType = GPIO_OType_OD;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+
+    GPIO_Init(CH378_INT_PORT, &gpio_init);
+	//GPIO_SetBits(CH378_INT_PORT,CH378_INT_PIN);
+	// A0
+	gpio_init.GPIO_Pin   = CH378_A0_PIN;
+    gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
+    gpio_init.GPIO_OType = GPIO_OType_PP;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+
+    GPIO_Init(CH378_A0_PORT, &gpio_init);
+	CH378_SET_A0();
+	// RD
+	gpio_init.GPIO_Pin   = CH378_nRD_PIN;
+    gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
+    gpio_init.GPIO_OType = GPIO_OType_PP;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+
+    GPIO_Init(CH378_nRD_PORT, &gpio_init);
+	CH378_SET_nRD();
+	// WR
+	gpio_init.GPIO_Pin   = CH378_nWR_PIN;
+    gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
+    gpio_init.GPIO_OType = GPIO_OType_PP;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+
+    GPIO_Init(CH378_nWR_PORT, &gpio_init);
+	CH378_SET_nWR();
+	// PCS
+	gpio_init.GPIO_Pin   = CH378_nPCS_PIN;
+    gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
+    gpio_init.GPIO_OType = GPIO_OType_PP;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+
+    GPIO_Init(CH378_nPCS_PORT, &gpio_init);
+	CH378_SET_nPCS();
+
+	//interrupt line init
+	EXTI_InitTypeDef   EXTI_InitStructure;
+	NVIC_InitTypeDef   NVIC_InitStructure;
+
+	/* Enable SYSCFG clock */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+	/* Connect EXTI Line0 to PG1 pin */
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOG, EXTI_PinSource1);
+
+	/* Configure EXTI Line1 */
+	EXTI_InitStructure.EXTI_Line = EXTI_Line1;
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;  
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitStructure);
+
+	/* Enable and set EXTI Line1 Interrupt to the lowest priority */
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 }
 
 
