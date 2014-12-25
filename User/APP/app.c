@@ -46,6 +46,22 @@
 *********************************************************************************************************
 */
 
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+/**
+* @brief
+* @note
+* @param
+* @retval
+*/
+PUTCHAR_PROTOTYPE
+{
+/* Place your implementation of fputc here */
+/* e.g. write a character to the USART */
+	USART_SendData(CONSOLE, (u8) ch);
+	/* Loop until the end of transmission */
+	while(USART_GetFlagStatus(CONSOLE, USART_FLAG_TC) == RESET);
+	return ch;
+}
 
 
 /*
@@ -161,6 +177,7 @@ static  void  AppTaskStart (void *p_arg)
 						OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR);
 	
 	mInitCH378Device();
+	
 	while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
         BSP_LED_Toggle(0u);
 		OSTimeDly(50);

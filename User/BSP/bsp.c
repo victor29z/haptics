@@ -120,7 +120,8 @@
 */
 
 static void  CH378_Port_Init(void);
-
+static void PWM_Config(void);
+static void ENC_Init(void);
 
 
 
@@ -184,7 +185,8 @@ void  BSP_Init (void)
         ;
     }
     CH378_Port_Init();
-    
+	PWM_Config();
+    ENC_Init();
 #ifdef TRACE_EN                                                 /* See project / compiler preprocessor options.         */
     BSP_CPU_REG_DBGMCU_CR |=  BSP_DBGMCU_CR_TRACE_IOEN_MASK;    /* Enable tracing (see Note #2).                        */
     BSP_CPU_REG_DBGMCU_CR &= ~BSP_DBGMCU_CR_TRACE_MODE_MASK;    /* Clr trace mode sel bits.                             */
@@ -256,7 +258,7 @@ void  BSP_LED_Init(void)
 
     BSP_PeriphEn(BSP_PERIPH_ID_GPIOH);                          /* Configure GPIOG for LED1 and LED2                    */
 
-    gpio_init.GPIO_Pin   = GPIO_Pin_2 | GPIO_Pin_3;
+    gpio_init.GPIO_Pin   = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_11;
     gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
     gpio_init.GPIO_OType = GPIO_OType_PP;
     gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
@@ -529,7 +531,7 @@ static void  CH378_Port_Init(void)
 	/* Enable SYSCFG clock */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
-	/* Connect EXTI Line0 to PG1 pin */
+	/* Connect EXTI Line1 to PG1 pin */
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOG, EXTI_PinSource1);
 
 	/* Configure EXTI Line1 */
@@ -547,6 +549,138 @@ static void  CH378_Port_Init(void)
 	NVIC_Init(&NVIC_InitStructure);
 }
 
+void PWM_Config(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	TIM_OCInitTypeDef  TIM_OCInitStructure;
+	uint16_t TimerPeriod = 0;
+	uint16_t Channel1Pulse = 0, Channel2Pulse = 0, Channel3Pulse = 0, Channel4Pulse = 0;
+	//pin config
+	RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_GPIOA  , ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_TIM1);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_TIM1);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_TIM1);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_TIM1);
+    
+	//   timer config
+	TimerPeriod = (SystemCoreClock / 17570 ) - 1;
+	/* Compute CCR1 value to generate a duty cycle at 50% for channel 1 and 1N */
+	Channel1Pulse = (uint16_t) (((uint32_t) 5 * (TimerPeriod - 1)) / 10);
+	/* Compute CCR2 value to generate a duty cycle at 37.5%  for channel 2 and 2N */
+	Channel2Pulse = (uint16_t) (((uint32_t) 375 * (TimerPeriod - 1)) / 1000);
+	/* Compute CCR3 value to generate a duty cycle at 25%  for channel 3 and 3N */
+	Channel3Pulse = (uint16_t) (((uint32_t) 25 * (TimerPeriod - 1)) / 100);
+	/* Compute CCR4 value to generate a duty cycle at 12.5%  for channel 4 */
+	Channel4Pulse = (uint16_t) (((uint32_t) 125 * (TimerPeriod- 1)) / 1000);
+
+	/* TIM1 clock enable */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1 , ENABLE);
+
+	/* Time Base configuration */
+	TIM_TimeBaseStructure.TIM_Prescaler = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseStructure.TIM_Period = TimerPeriod;
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+
+	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
+
+	/* Channel 1, 2,3 and 4 Configuration in PWM mode */
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
+	TIM_OCInitStructure.TIM_Pulse = Channel1Pulse;
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
+	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_High;
+	TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
+	TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCIdleState_Reset;
+
+	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
+
+	TIM_OCInitStructure.TIM_Pulse = Channel2Pulse;
+	TIM_OC2Init(TIM1, &TIM_OCInitStructure);
+
+	TIM_OCInitStructure.TIM_Pulse = Channel3Pulse;
+	TIM_OC3Init(TIM1, &TIM_OCInitStructure);
+
+	TIM_OCInitStructure.TIM_Pulse = Channel4Pulse;
+	TIM_OC4Init(TIM1, &TIM_OCInitStructure);
+
+	/* TIM1 counter enable */
+	TIM_Cmd(TIM1, ENABLE);
+
+	/* TIM1 Main Output Enable */
+	TIM_CtrlPWMOutputs(TIM1, ENABLE);
+}
+
+void ENC_Init(void)
+{
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;  
+	TIM_ICInitTypeDef TIM_ICInitStructure;  
+	GPIO_InitTypeDef GPIO_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+
+
+
+	//GPIO_StructInit(&GPIO_InitStructure);
+	/* Configure PC.06,07 as encoder input */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+
+	GPIO_PinAFConfig(GPIOC,GPIO_PinSource6,GPIO_AF_TIM3);
+	GPIO_PinAFConfig(GPIOC,GPIO_PinSource7,GPIO_AF_TIM3);
+
+	/* Enable the TIM3 Update Interrupt */
+	//  NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+	//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	//  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	//  NVIC_Init(&NVIC_InitStructure);
+
+	/* Timer configuration in Encoder mode */ 
+	//TIM_DeInit(TIM3);
+	TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
+
+	TIM_TimeBaseStructure.TIM_Prescaler = 0x0; // No prescaling 
+	TIM_TimeBaseStructure.TIM_Period = 60000; 
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;   
+	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
+
+	TIM_EncoderInterfaceConfig(TIM3, TIM_EncoderMode_TI1, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	TIM_ICStructInit(&TIM_ICInitStructure);
+	TIM_ICInitStructure.TIM_ICFilter = 0;
+	TIM_ICInit(TIM3, &TIM_ICInitStructure);
+
+	// Clear all pending interrupts
+	TIM_ClearFlag(TIM3, TIM_FLAG_Update);
+	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+	//Reset counter
+	//TIM2->CNT = 100;
+
+	// ENC_Clear_Speed_Buffer();
+
+	TIM_Cmd(TIM3, ENABLE); 
+}
 
 /*
 *********************************************************************************************************

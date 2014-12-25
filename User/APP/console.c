@@ -23,13 +23,16 @@ void ConsoleService_task(void *p_arg){
 					nrx,
 					10);
 		
-		OSWriteUart(	__bsp_uart_console,
+		
+		if(rx_buf[0] == 'e')printf("encoder:%d\r\n",TIM3->CNT);	
+		else if(rx_buf[0] == 'c') TIM3->CNT = 0;	
+		else
+			OSWriteUart(	__bsp_uart_console,
 					rx_buf,
 					nrx,
 					10);
-		
-		
 	}
+	
 
 }
 

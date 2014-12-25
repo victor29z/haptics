@@ -284,6 +284,7 @@
 */
 
 #define __bsp_uart_console	2	//usart3
+#define CONSOLE		USART3
 
 
 /*
