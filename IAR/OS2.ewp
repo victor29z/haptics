@@ -99,7 +99,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>STM32F407IG	ST STM32F407IG</state>
+          <state>STM32F405VG	ST STM32F405VG</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -601,7 +601,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>OS.srec</state>
+          <state>OS2.srec</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -719,7 +719,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$PROJ_DIR$\..\User\BSP\IAR\STM32F4xx_FLASH.icf</state>
+          <state>F:\6dof\zl-dev\Micrium\User\BSP\IAR\stm32f405xx_flash.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -968,7 +968,7 @@
     <group>
       <name>IAR</name>
       <file>
-        <name>$PROJ_DIR$\..\User\BSP\IAR\startup_stm32f40_41xxx.s</name>
+        <name>$PROJ_DIR$\..\User\BSP\IAR\startup_stm32f40xx.s</name>
       </file>
     </group>
     <group>
