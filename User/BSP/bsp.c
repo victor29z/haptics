@@ -122,6 +122,7 @@
 static void  CH378_Port_Init(void);
 static void PWM_Config(void);
 static void ENC_Init(void);
+static void  BSP_MotorControl_Init(void);
 
 
 
@@ -155,7 +156,7 @@ void  BSP_Init (void)
 //    BSP_IntInit();//set vector table
     
     RCC_DeInit();
-    RCC_HSEConfig(RCC_HSE_ON);                                  /* HSE = 25MHz ext. crystal.                            */
+    RCC_HSEConfig(RCC_HSE_ON);                                  /* HSE = 8MHz ext. crystal.                            */
     RCC_WaitForHSEStartUp();
     
     RCC_HCLKConfig(RCC_SYSCLK_Div1);                            /* HCLK    = AHBCLK  = PLL / AHBPRES(1) = 168MHz.       */
@@ -184,9 +185,12 @@ void  BSP_Init (void)
     while (RCC_GetSYSCLKSource() != RCC_CFGR_SWS_PLL) {
         ;
     }
+	BSP_LED_Init();
+	BSP_MotorControl_Init();
     CH378_Port_Init();
 	PWM_Config();
-    ENC_Init();
+	ENABLE_MOTOR();
+    //ENC_Init();
 #ifdef TRACE_EN                                                 /* See project / compiler preprocessor options.         */
     BSP_CPU_REG_DBGMCU_CR |=  BSP_DBGMCU_CR_TRACE_IOEN_MASK;    /* Enable tracing (see Note #2).                        */
     BSP_CPU_REG_DBGMCU_CR &= ~BSP_DBGMCU_CR_TRACE_MODE_MASK;    /* Clr trace mode sel bits.                             */
@@ -255,26 +259,43 @@ void  BSP_LED_Init(void)
 {
     GPIO_InitTypeDef  gpio_init;
 
+    BSP_PeriphEn(BSP_PERIPH_ID_GPIOA); 
+	BSP_PeriphEn(BSP_PERIPH_ID_GPIOC);
+	BSP_PeriphEn(BSP_PERIPH_ID_GPIOE);
 
-    BSP_PeriphEn(BSP_PERIPH_ID_GPIOH);                          /* Configure GPIOG for LED1 and LED2                    */
-
-    gpio_init.GPIO_Pin   = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_11;
+//leds init
     gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
     gpio_init.GPIO_OType = GPIO_OType_PP;
     gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
+	
+    gpio_init.GPIO_Pin   = LED1_PIN;
+    GPIO_Init(LED1_PORT, &gpio_init);
 
-    GPIO_Init(GPIOH, &gpio_init);
+	gpio_init.GPIO_Pin	 = LED2_PIN;
+	GPIO_Init(LED2_PORT, &gpio_init);
+	
+    gpio_init.GPIO_Pin   = LED3_PIN;
+    GPIO_Init(LED3_PORT, &gpio_init);
+	
+    gpio_init.GPIO_Pin   = LED4_PIN;
+    GPIO_Init(LED4_PORT, &gpio_init);
 
-    BSP_PeriphEn(BSP_PERIPH_ID_GPIOI);                          /* Configure GPIOG for LED1 and LED2                    */
+// keys init
+	gpio_init.GPIO_Mode  = GPIO_Mode_IN;
+	
+    gpio_init.GPIO_Pin   = KEY1_PIN;
+    GPIO_Init(KEY1_PORT, &gpio_init);
 
-    gpio_init.GPIO_Pin   = GPIO_Pin_8 | GPIO_Pin_10;
-    gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
-    gpio_init.GPIO_OType = GPIO_OType_PP;
-    gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+	gpio_init.GPIO_Pin	 = KEY2_PIN;
+	GPIO_Init(KEY2_PORT, &gpio_init);
+	
+    gpio_init.GPIO_Pin   = KEY3_PIN;
+    GPIO_Init(KEY3_PORT, &gpio_init);
+	
+    gpio_init.GPIO_Pin   = KEY4_PIN;
+    GPIO_Init(KEY4_PORT, &gpio_init);
 
-    GPIO_Init(GPIOI, &gpio_init);
 }
 
 
@@ -463,27 +484,25 @@ static void  CH378_Port_Init(void)
 {
     GPIO_InitTypeDef  gpio_init;
 
-    BSP_PeriphEn(BSP_PERIPH_ID_GPIOH);
-	BSP_PeriphEn(BSP_PERIPH_ID_GPIOA);
-	BSP_PeriphEn(BSP_PERIPH_ID_GPIOG);
-	BSP_PeriphEn(BSP_PERIPH_ID_GPIOB);
-	BSP_PeriphEn(BSP_PERIPH_ID_GPIOF);
-	// data bus PF0-PF7
+    BSP_PeriphEn(BSP_PERIPH_ID_GPIOD);
+	BSP_PeriphEn(BSP_PERIPH_ID_GPIOE);
+	
+	// data bus PD0-PD7
     gpio_init.GPIO_Pin   = 	   GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3
 							 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
     gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
     gpio_init.GPIO_OType = GPIO_OType_OD;
     gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
 
-    GPIO_Init(GPIOF, &gpio_init);
+    GPIO_Init(CH378_DAT_PORT, &gpio_init);
 	CH378_WRITE_DB(0xff);
 	// INT
 	gpio_init.GPIO_Pin   = CH378_INT_PIN;
     gpio_init.GPIO_Mode  = GPIO_Mode_IN;
 //	gpio_init.GPIO_OType = GPIO_OType_OD;
     gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
 
     GPIO_Init(CH378_INT_PORT, &gpio_init);
 	//GPIO_SetBits(CH378_INT_PORT,CH378_INT_PIN);
@@ -492,7 +511,7 @@ static void  CH378_Port_Init(void)
     gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
     gpio_init.GPIO_OType = GPIO_OType_PP;
     gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
 
     GPIO_Init(CH378_A0_PORT, &gpio_init);
 	CH378_SET_A0();
@@ -501,7 +520,7 @@ static void  CH378_Port_Init(void)
     gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
     gpio_init.GPIO_OType = GPIO_OType_PP;
     gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
 
     GPIO_Init(CH378_nRD_PORT, &gpio_init);
 	CH378_SET_nRD();
@@ -510,7 +529,7 @@ static void  CH378_Port_Init(void)
     gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
     gpio_init.GPIO_OType = GPIO_OType_PP;
     gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
 
     GPIO_Init(CH378_nWR_PORT, &gpio_init);
 	CH378_SET_nWR();
@@ -519,7 +538,7 @@ static void  CH378_Port_Init(void)
     gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
     gpio_init.GPIO_OType = GPIO_OType_PP;
     gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
 
     GPIO_Init(CH378_nPCS_PORT, &gpio_init);
 	CH378_SET_nPCS();
@@ -532,21 +551,122 @@ static void  CH378_Port_Init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
 	/* Connect EXTI Line1 to PG1 pin */
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOG, EXTI_PinSource1);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource0);
 
 	/* Configure EXTI Line1 */
-	EXTI_InitStructure.EXTI_Line = EXTI_Line1;
+	EXTI_InitStructure.EXTI_Line = EXTI_Line0;
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;  
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&EXTI_InitStructure);
 
 	/* Enable and set EXTI Line1 Interrupt to the lowest priority */
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
+}
+
+static void SPI_Send_Byte(uint8_t dat){
+	uint8_t i,j;
+	for(i=0;i<8;i++){
+		if(dat & 0x01)
+			SET_SDI_HIGH();
+		else
+			SET_SDI_LOW();
+		dat >>= 1;
+		SET_SCK_HIGH();
+		j=0xff;
+		while(j--);
+		SET_SCK_LOW();
+		j=0xff;
+		while(j--);
+	}
+}
+
+static void  BSP_MotorControl_Init(void)
+{
+	GPIO_InitTypeDef  gpio_init;
+	SPI_InitTypeDef  SPI_InitStructure;
+	BSP_PeriphEn(BSP_PERIPH_ID_GPIOA);
+	BSP_PeriphEn(BSP_PERIPH_ID_GPIOB);
+	BSP_PeriphEn(BSP_PERIPH_ID_GPIOD);
+	BSP_PeriphEn(BSP_PERIPH_ID_GPIOE);
+
+	
+
+	/*!< Enable the SPI clock */
+	BSP_PeriphEn(BSP_PERIPH_ID_SPI2);
+
+	
+	/*!< SPI pins configuration *************************************************/
+
+	
+
+
+	// DIS
+	gpio_init.GPIO_Pin   = M_DIS_PIN;
+    gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
+    gpio_init.GPIO_OType = GPIO_OType_PP;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
+
+    GPIO_Init(M_DIS_PORT, &gpio_init);
+	DISABLE_MOTOR();
+	
+	// MOSI
+	gpio_init.GPIO_Pin   = M_SDI_PIN;
+    gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
+    gpio_init.GPIO_OType = GPIO_OType_PP;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_DOWN;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
+
+    GPIO_Init(M_SDI_PORT, &gpio_init);
+
+	// SCLK
+	gpio_init.GPIO_Pin   = M_SCLK_PIN;
+    gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
+    gpio_init.GPIO_OType = GPIO_OType_PP;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_DOWN;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
+
+    GPIO_Init(M_SCLK_PORT, &gpio_init);
+
+	// MISO
+	gpio_init.GPIO_Pin   = M_SDO_PIN;
+    gpio_init.GPIO_Mode  = GPIO_Mode_IN;
+    gpio_init.GPIO_OType = GPIO_OType_OD;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_DOWN;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
+
+    GPIO_Init(M_SDO_PORT, &gpio_init);
+
+	// CS1
+	gpio_init.GPIO_Pin   = M1_CSN_PIN;
+    gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
+    gpio_init.GPIO_OType = GPIO_OType_PP;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
+
+    GPIO_Init(M1_CSN_PORT, &gpio_init);
+
+	SET_M_CSN_HIGH(1);
+
+	gpio_init.GPIO_Pin   = M1_DIR_PIN;
+    gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
+    gpio_init.GPIO_OType = GPIO_OType_PP;
+    gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
+    gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
+
+    GPIO_Init(M1_DIR_PORT, &gpio_init);
+	SET_M_CSN_LOW(1);
+	SPI_Send_Byte(0x44);
+	SET_M_CSN_HIGH(1);
+
+	SET_M_DIR_HIGH(1);
+
+
 }
 
 void PWM_Config(void)
@@ -571,16 +691,16 @@ void PWM_Config(void)
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_TIM1);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_TIM1);
     
-	//   timer config
+	//   timer config 17.57khz
 	TimerPeriod = (SystemCoreClock / 17570 ) - 1;
 	/* Compute CCR1 value to generate a duty cycle at 50% for channel 1 and 1N */
-	Channel1Pulse = (uint16_t) (((uint32_t) 5 * (TimerPeriod - 1)) / 10);
+	Channel1Pulse = (uint16_t) (((uint32_t) 0 * (TimerPeriod - 1)) / 10);
 	/* Compute CCR2 value to generate a duty cycle at 37.5%  for channel 2 and 2N */
 	Channel2Pulse = (uint16_t) (((uint32_t) 375 * (TimerPeriod - 1)) / 1000);
 	/* Compute CCR3 value to generate a duty cycle at 25%  for channel 3 and 3N */
 	Channel3Pulse = (uint16_t) (((uint32_t) 25 * (TimerPeriod - 1)) / 100);
 	/* Compute CCR4 value to generate a duty cycle at 12.5%  for channel 4 */
-	Channel4Pulse = (uint16_t) (((uint32_t) 125 * (TimerPeriod- 1)) / 1000);
+	Channel4Pulse = (uint16_t) (((uint32_t) 700 * (TimerPeriod- 1)) / 1000);
 
 	/* TIM1 clock enable */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1 , ENABLE);
@@ -629,25 +749,22 @@ void ENC_Init(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 
-
+// ENC1 init
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-
-
-
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
 	//GPIO_StructInit(&GPIO_InitStructure);
-	/* Configure PC.06,07 as encoder input */
+	/* Configure PA.06,07 as encoder input */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 
-	GPIO_PinAFConfig(GPIOC,GPIO_PinSource6,GPIO_AF_TIM3);
-	GPIO_PinAFConfig(GPIOC,GPIO_PinSource7,GPIO_AF_TIM3);
+	GPIO_PinAFConfig(GPIOA,GPIO_PinSource6,GPIO_AF_TIM3);
+	GPIO_PinAFConfig(GPIOA,GPIO_PinSource7,GPIO_AF_TIM3);
 
 	/* Enable the TIM3 Update Interrupt */
 	//  NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
@@ -674,12 +791,142 @@ void ENC_Init(void)
 	// Clear all pending interrupts
 	TIM_ClearFlag(TIM3, TIM_FLAG_Update);
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
-	//Reset counter
-	//TIM2->CNT = 100;
-
-	// ENC_Clear_Speed_Buffer();
 
 	TIM_Cmd(TIM3, ENABLE); 
+
+// ENC2 init
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+	//GPIO_StructInit(&GPIO_InitStructure);
+	/* Configure PA.06,07 as encoder input */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+
+	GPIO_PinAFConfig(GPIOA,GPIO_PinSource0,GPIO_AF_TIM5);
+	GPIO_PinAFConfig(GPIOA,GPIO_PinSource1,GPIO_AF_TIM5);
+
+	/* Enable the TIM3 Update Interrupt */
+	//  NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+	//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	//  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	//  NVIC_Init(&NVIC_InitStructure);
+
+	/* Timer configuration in Encoder mode */ 
+	//TIM_DeInit(TIM3);
+	TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
+
+	TIM_TimeBaseStructure.TIM_Prescaler = 0x0; // No prescaling 
+	TIM_TimeBaseStructure.TIM_Period = 60000; 
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;   
+	TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
+
+	TIM_EncoderInterfaceConfig(TIM5, TIM_EncoderMode_TI1, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	TIM_ICStructInit(&TIM_ICInitStructure);
+	TIM_ICInitStructure.TIM_ICFilter = 0;
+	TIM_ICInit(TIM5, &TIM_ICInitStructure);
+
+	// Clear all pending interrupts
+	TIM_ClearFlag(TIM5, TIM_FLAG_Update);
+	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);
+
+	TIM_Cmd(TIM5, ENABLE); 
+
+// ENC3 init
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+
+	//GPIO_StructInit(&GPIO_InitStructure);
+	/* Configure PA.06,07 as encoder input */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
+
+
+	GPIO_PinAFConfig(GPIOD,GPIO_PinSource12,GPIO_AF_TIM4);
+	GPIO_PinAFConfig(GPIOD,GPIO_PinSource13,GPIO_AF_TIM4);
+
+	/* Enable the TIM3 Update Interrupt */
+	//  NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+	//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	//  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	//  NVIC_Init(&NVIC_InitStructure);
+
+	/* Timer configuration in Encoder mode */ 
+	//TIM_DeInit(TIM3);
+	TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
+
+	TIM_TimeBaseStructure.TIM_Prescaler = 0x0; // No prescaling 
+	TIM_TimeBaseStructure.TIM_Period = 60000; 
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;   
+	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
+
+	TIM_EncoderInterfaceConfig(TIM4, TIM_EncoderMode_TI1, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	TIM_ICStructInit(&TIM_ICInitStructure);
+	TIM_ICInitStructure.TIM_ICFilter = 0;
+	TIM_ICInit(TIM4, &TIM_ICInitStructure);
+
+	// Clear all pending interrupts
+	TIM_ClearFlag(TIM4, TIM_FLAG_Update);
+	TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);
+
+	TIM_Cmd(TIM4, ENABLE); 
+
+
+}
+
+void SetEncoder(uint32_t dat, uint8_t n){
+	switch(n){
+	case 0:
+		ENC1->CNT = dat;
+	break;
+
+	case 1:
+		ENC2->CNT = dat;
+	break;
+
+	case 2:
+		ENC3->CNT = dat;
+	break;
+			
+	}
+}
+
+uint32_t GetEncoder(uint8_t n){
+	switch(n){
+	case 0:
+		return ENC1->CNT;
+	break;
+
+	case 1:
+		return ENC2->CNT;
+	break;
+
+	case 2:
+		return ENC3->CNT;
+	break;
+			
+	}
+}
+
+uint8_t GetKeys(void){
+	uint8_t temp;
+	temp = 	GPIO_ReadInputDataBit(KEY1_PORT,KEY1_PIN) | 
+			GPIO_ReadInputDataBit(KEY2_PORT,KEY2_PIN)<<1 |
+			GPIO_ReadInputDataBit(KEY3_PORT,KEY3_PIN)<<2 | 
+			GPIO_ReadInputDataBit(KEY4_PORT,KEY4_PIN)<<3;
 }
 
 /*

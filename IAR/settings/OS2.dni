@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=1248828344
+Checksum=-704535947
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -80,10 +80,7 @@ SumSortOrder=0
 [Disassemble mode]
 mode=0
 [Breakpoints2]
-Bp0=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\app.c}.178.2" 0 0 1 "" 0 "" 0
-Bp1=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\Drivers\src\ch378.c}.103.2" 0 0 1 "" 0 "" 0
-Bp2=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\stm32f4xx_it.c}.192.2" 0 0 1 "" 0 "" 0
-Count=3
+Count=0
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""

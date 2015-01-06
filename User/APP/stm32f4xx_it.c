@@ -187,12 +187,12 @@ void UART5_IRQHandler(void)
 	OSIntExit();    
 }
 
-void EXTI1_IRQHandler(void)
+void EXTI0_IRQHandler(void)
 {
-	if(EXTI_GetITStatus(EXTI_Line1) != RESET)
+	if(EXTI_GetITStatus(EXTI_Line0) != RESET)
 	{
 		/* Clear the EXTI line 1 pending bit */
-		EXTI_ClearITPendingBit(EXTI_Line1);
+		EXTI_ClearITPendingBit(EXTI_Line0);
 		mCH378Interrupt();
 	}
 }

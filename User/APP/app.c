@@ -40,6 +40,9 @@
 #include "stdio.h"
 #include "ch378.h"
 
+int DesCur[6]= {0};//目标电流
+
+
 /*
 *********************************************************************************************************
 *                                            LOCAL DEFINES
@@ -152,9 +155,8 @@ static  void  AppTaskStart (void *p_arg)
    (void)p_arg;
 
     BSP_Init();                                                 /* Initialize BSP functions                             */
-	BSP_LED_Init();                                             /* Init LEDs.                                           */
+	//BSP_LED_Init();                                             /* Init LEDs.                                           */
 	systick_init();                                            /* Start Tick Initialization                            */
-    BSP_LED_Off(0u);
     OSTaskCreateExt(UartMonitor_task,
 						(void *)0,								  
 						&UMon_task_stk[SMALL_TASK_STK_SIZE - 1], 
@@ -165,7 +167,7 @@ static  void  AppTaskStart (void *p_arg)
 						(void *)0,		
 						OS_TASK_OPT_NONE);
 	
-
+/*
 	OSTaskCreateExt(ConsoleService_task,
 						(void *)0,								
 						&Console_task_stk[LARGE_TASK_STK_SIZE - 1],
@@ -175,11 +177,11 @@ static  void  AppTaskStart (void *p_arg)
 						LARGE_TASK_STK_SIZE,
 						(void *)0,								
 						OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR);
-	
+	*/
 	mInitCH378Device();
 	
 	while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
-        BSP_LED_Toggle(0u);
+        //BSP_LED_Toggle(0u);
 		OSTimeDly(50);
               
     }

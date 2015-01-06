@@ -5,7 +5,7 @@
 
 void xWriteCH378Data( UINT8 mData )  		
 {
-    u8 i=0xff;
+    u8 i=0x05;
 	CH378_RESET_A0();
 	CH378_RESET_nPCS();
 	CH378_WRITE_DB(mData);
@@ -20,7 +20,7 @@ void xWriteCH378Data( UINT8 mData )
 
 void xWriteCH378Cmd( UINT8 mCmd )  		
 {
-	u8 i=0xff;
+	u8 i=0x05;
 	CH378_SET_A0();
 	CH378_RESET_nPCS();
 	CH378_WRITE_DB(mCmd);
@@ -35,7 +35,7 @@ void xWriteCH378Cmd( UINT8 mCmd )
 u8  xReadCH378Data( void  )  		
 {
 	UINT8 mData;
-	u8 i=0xff;
+	u8 i=0x05;
 	CH378_RESET_A0();
 	CH378_WRITE_DB(0xff);//clear the bus
 	CH378_RESET_nPCS();
@@ -76,10 +76,10 @@ u8 mInitCH378Device( void )
 	xWriteCH378Data( 0x37 );									 			
 #endif
 									
-#if  0
+#if  1
 	/* 设置USB 速度 */
 	xWriteCH378Cmd( CMD10_SET_USB_SPEED );  						 			/* 设备芯片USB速度 */
-	xWriteCH378Data( 0x00 );													/* 全速模式 */									 												 			
+	xWriteCH378Data( 0x02 );													/* 全速模式 */									 												 			
 	//xEndCH378Cmd( );
 #endif
 
@@ -89,7 +89,7 @@ u8 mInitCH378Device( void )
 
 	/* 等待模式设置完毕,对于操作SD卡大概需要10mS左右时间,对于操作USB设备大概需要35mS左右时间 */	
 	
-	OSTimeDlyHMSM(0,0,0,70);
+	OSTimeDlyHMSM(0,0,0,200);
 	res = xReadCH378Data( );
 //	printf( "res2: %02X\n", (UINT16)res );
 	
@@ -111,6 +111,7 @@ u8 mInitCH378Device( void )
 }	
 u8 Out_Packet[15] = {0};     // Last packet received from host
 u8 In_Packet[15]  = {0};     // Next packet to sent to host
+extern int DesCur[6];
 // dev_feedback control word
 #define 	DEV_POS_STA			1
 // USB micro
@@ -131,7 +132,7 @@ void	mCH378Interrupt( void )
 	u8  *pbuf;
 
 	u32		u32Temp = 0;
-	u8		IState[3] = {0};
+//	u8		IState[3] = {0};
 //	U8 		devState = 0;
 //	U8 		watchT[2]={0};
 	
@@ -206,14 +207,15 @@ void	mCH378Interrupt( void )
 
 			for (i=0;i<6;i++)
 			{
-				//?/DesCur[i] = (Out_Packet[1+2*i+1]<<8)|(Out_Packet[1+2*i]);			// initial data buffer							
+				DesCur[i] = (Out_Packet[1+2*i+1]<<8)|(Out_Packet[1+2*i]);			// initial data buffer							
 			}
 			break;
 		case CTW_SET_POS:
 			for(i=0;i<6;i++)
 			{
-									u32Temp =(Out_Packet[2*i+2]<<8)|Out_Packet[2*i+1];
+				u32Temp =(Out_Packet[2*i+2]<<8)|Out_Packet[2*i+1];
 				//?/Write_7166_PR(u32Temp,i+ENC_STA); // ENC_STA +5 route
+				SetEncoder(u32Temp,i);
 			}
 			break;
 		default:
@@ -224,7 +226,7 @@ void	mCH378Interrupt( void )
 		In_Packet[0] = DEV_POS_STA;
 		for (i=0;i<6;i++)
 		{
-			//?/u32Temp = Read_7166_OL(i+ENC_STA);
+			u32Temp = GetEncoder(i);
 			In_Packet[2*i+1] = 0xff & u32Temp;
 			In_Packet[2*i+2] = 0xff &(u32Temp>>8);					
 		}		
@@ -232,7 +234,8 @@ void	mCH378Interrupt( void )
 		//?/IState[0] = ~I1;
 		//?/IState[1] = ~I2;
 		//?/IState[2] = ~I3;		
-		In_Packet[13]=IState[0]|(IState[1]<<1)|(IState[2]<<2);
+		//In_Packet[13]=IState[0]|(IState[1]<<1)|(IState[2]<<2);
+		In_Packet[13] = GetKeys();
 		break;
 
 	case USB_INT_BUS_SUSP:											/* USB总线挂起中断 */

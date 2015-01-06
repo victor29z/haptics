@@ -73,6 +73,8 @@
 #include  <lib_ascii.h>
 
 #include  <stm32f4xx_gpio.h>
+#include  <stm32f4xx_spi.h>
+
 #include "core_cm4.h"
 #include "os_cfg.h"
 /*
@@ -292,20 +294,21 @@
 *                                             CH378 DEFINES
 *********************************************************************************************************
 */
+#define CH378_DAT_PORT		GPIOD
 
-#define CH378_INT_PORT		GPIOG
-#define CH378_INT_PIN		GPIO_Pin_1
+#define CH378_INT_PORT		GPIOE
+#define CH378_INT_PIN		GPIO_Pin_0
 
-#define CH378_A0_PORT		GPIOH
-#define CH378_A0_PIN		GPIO_Pin_5
+#define CH378_A0_PORT		GPIOE
+#define CH378_A0_PIN		GPIO_Pin_1
 
-#define CH378_nRD_PORT		GPIOA
-#define CH378_nRD_PIN		GPIO_Pin_4
+#define CH378_nRD_PORT		GPIOE
+#define CH378_nRD_PIN		GPIO_Pin_3
 
-#define CH378_nWR_PORT		GPIOA
-#define CH378_nWR_PIN		GPIO_Pin_6
+#define CH378_nWR_PORT		GPIOE
+#define CH378_nWR_PIN		GPIO_Pin_4
 
-#define CH378_nPCS_PORT		GPIOB
+#define CH378_nPCS_PORT		GPIOE
 #define CH378_nPCS_PIN		GPIO_Pin_2
 
 #define CH378_SET_A0()			GPIO_SetBits(CH378_A0_PORT,CH378_A0_PIN)
@@ -320,8 +323,95 @@
 #define CH378_SET_nPCS()		GPIO_SetBits(CH378_nPCS_PORT,CH378_nPCS_PIN)
 #define CH378_RESET_nPCS()		GPIO_ResetBits(CH378_nPCS_PORT,CH378_nPCS_PIN)
 
-#define CH378_WRITE_DB(dat)		do{u16 temp = GPIOF->ODR&0xff00;temp+=dat;GPIOF->ODR=temp;}while(0)
-#define CH378_READ_DB()			((GPIOF->IDR)&0xff)
+#define CH378_WRITE_DB(dat)		do{u16 temp = CH378_DAT_PORT->ODR&0xff00;temp+=dat;CH378_DAT_PORT->ODR=temp;}while(0)
+#define CH378_READ_DB()			((CH378_DAT_PORT->IDR)&0xff)
+
+/*
+*********************************************************************************************************
+*                                             LEDS AND KEYS DEFINES
+*********************************************************************************************************
+*/
+
+#define LED1_PORT		GPIOE
+#define LED1_PIN		GPIO_Pin_6
+
+#define LED2_PORT		GPIOC
+#define LED2_PIN		GPIO_Pin_13
+
+#define LED3_PORT		GPIOC
+#define LED3_PIN		GPIO_Pin_14
+
+#define LED4_PORT		GPIOC
+#define LED4_PIN		GPIO_Pin_15
+
+#define KEY1_PORT		GPIOA
+#define KEY1_PIN		GPIO_Pin_2
+
+#define KEY2_PORT		GPIOA
+#define KEY2_PIN		GPIO_Pin_3
+
+#define KEY3_PORT		GPIOA
+#define KEY3_PIN		GPIO_Pin_4
+
+#define KEY4_PORT		GPIOA
+#define KEY4_PIN		GPIO_Pin_5
+
+
+/*
+*********************************************************************************************************
+*                                             MOTOR CONTROL DEFINES
+*********************************************************************************************************
+*/
+
+#define M_DIS_PORT		GPIOD
+#define M_DIS_PIN		GPIO_Pin_10
+
+#define M_SDI_PORT		GPIOB
+#define M_SDI_PIN		GPIO_Pin_15
+
+#define M_SCLK_PORT		GPIOB
+#define M_SCLK_PIN		GPIO_Pin_13
+
+#define M_SDO_PORT		GPIOB
+#define M_SDO_PIN		GPIO_Pin_14
+
+#define M1_CSN_PORT		GPIOB
+#define M1_CSN_PIN		GPIO_Pin_3
+
+#define M1_DIR_PORT		GPIOE
+#define M1_DIR_PIN		GPIO_Pin_13
+
+#define M1_PWM_PORT		GPIOA
+#define M1_PWM_PIN		GPIO_Pin_11
+
+
+#define DISABLE_MOTOR()     GPIO_SetBits(M_DIS_PORT, M_DIS_PIN)
+#define ENABLE_MOTOR()      GPIO_ResetBits(M_DIS_PORT, M_DIS_PIN)  
+
+#define SET_SCK_HIGH()     GPIO_SetBits(M_SCLK_PORT, M_SCLK_PIN)
+#define SET_SCK_LOW()      GPIO_ResetBits(M_SCLK_PORT, M_SCLK_PIN)  
+
+#define SET_SDI_HIGH()     GPIO_SetBits(M_SDI_PORT, M_SDI_PIN)
+#define SET_SDI_LOW()      GPIO_ResetBits(M_SDI_PORT, M_SDI_PIN)  
+
+
+#define SET_M_CSN_HIGH(n)	GPIO_SetBits(M##n##_CSN_PORT, M##n##_CSN_PIN)
+#define SET_M_CSN_LOW(n)	GPIO_ResetBits(M##n##_CSN_PORT, M##n##_CSN_PIN)
+
+#define SET_M_DIR_HIGH(n)	GPIO_SetBits(M##n##_DIR_PORT, M##n##_DIR_PIN)
+#define SET_M_DIR_LOW(n)	GPIO_ResetBits(M##n##_DIR_PORT, M##n##_DIR_PIN)
+
+/*
+*********************************************************************************************************
+*                                             ENCODER DEFINES
+*********************************************************************************************************
+*/
+#define ENC1	TIM3
+#define ENC2	TIM5
+#define ENC3	TIM4
+
+
+
 
 /*
 *********************************************************************************************************
@@ -336,6 +426,10 @@ void        BSP_IntDisAll                     (void);
 CPU_INT32U  BSP_CPU_ClkFreq                   (void);
 void systick_init(void) ;
 void  BSP_LED_Init(void);
+void SetEncoder(uint32_t dat, uint8_t n);
+uint32_t GetEncoder(uint8_t n);
+uint8_t GetKeys(void);
+
 
 
 
