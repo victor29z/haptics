@@ -202,6 +202,9 @@ static  void  AppTaskStart (void *p_arg)
 		OSTimeDly(300);
 	while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
         //BSP_LED_Toggle(0u);
+        //GetEncoder(0);
+		//GetEncoder(1);
+		//GetEncoder(2);
 		OSTimeDly(50);
               
     }

@@ -181,7 +181,15 @@ void	mCH378Interrupt( void )
 		}
 			// input part
 		pbuf = In_Packet;
-		In_Packet[0] = DEV_POS_STA;					// new modification
+		// prepare In_packet data:
+		In_Packet[0] = DEV_POS_STA;
+		for (i=0;i<6;i++)
+		{
+			u32Temp = GetEncoder(i);
+			In_Packet[2*i+1] = 0xff & u32Temp;
+			In_Packet[2*i+2] = 0xff &(u32Temp>>8);					
+		}		
+		In_Packet[13] = GetKeys();
 	//	pbuf = Out_Packet;
 		xWriteCH378Cmd( CMD30_WR_USB_DATA );					 	/* 向指定USB端点的发送缓冲区写入数据块 */		
 		xWriteCH378Data( ENDP_INDEX_3 );		   					/* 端点索引 */
@@ -225,21 +233,8 @@ void	mCH378Interrupt( void )
 			break;
 		}	
 	// switch Out_packet[0]
-// prepare In_packet data:
-		In_Packet[0] = DEV_POS_STA;
-		for (i=0;i<6;i++)
-		{
-			u32Temp = GetEncoder(i);
-			In_Packet[2*i+1] = 0xff & u32Temp;
-			In_Packet[2*i+2] = 0xff &(u32Temp>>8);					
-		}		
 
-		//?/IState[0] = ~I1;
-		//?/IState[1] = ~I2;
-		//?/IState[2] = ~I3;		
-		//In_Packet[13]=IState[0]|(IState[1]<<1)|(IState[2]<<2);
-		In_Packet[13] = GetKeys();
-		break;
+	break;
 
 	case USB_INT_BUS_SUSP:											/* USB总线挂起中断 */
 //		printf("BUS_SUSP\n");	

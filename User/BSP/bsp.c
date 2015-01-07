@@ -191,7 +191,7 @@ void  BSP_Init (void)
     CH378_Port_Init();
 	PWM_Config();
 	ENABLE_MOTOR();
-    //ENC_Init();
+    ENC_Init();
 #ifdef TRACE_EN                                                 /* See project / compiler preprocessor options.         */
     BSP_CPU_REG_DBGMCU_CR |=  BSP_DBGMCU_CR_TRACE_IOEN_MASK;    /* Enable tracing (see Note #2).                        */
     BSP_CPU_REG_DBGMCU_CR &= ~BSP_DBGMCU_CR_TRACE_MODE_MASK;    /* Clr trace mode sel bits.                             */
@@ -957,10 +957,15 @@ void SetEncoder(uint32_t dat, uint8_t n){
 			
 	}
 }
-
+unsigned int enc_value[6];
 uint32_t GetEncoder(uint8_t n){
+	//for monitor encoder value
+	//enc_value[0] = ENC1->CNT;
+	//enc_value[1] = ENC2->CNT;
+	//enc_value[2] = ENC3->CNT;
 	switch(n){
 	case 0:
+		
 		return ENC1->CNT;
 	break;
 
