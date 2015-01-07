@@ -3,6 +3,8 @@
 /* 附加的USB操作状态定义 */
 #define	ERR_USB_UNKNOWN			   0xFA							 /* 未知错误,不应该发生的情况,需检查硬件或者程序错误 */
 
+extern OS_EVENT* Sem_NewIOMSG;
+
 void xWriteCH378Data( UINT8 mData )  		
 {
     u8 i=0x05;
@@ -111,7 +113,7 @@ u8 mInitCH378Device( void )
 }	
 u8 Out_Packet[15] = {0};     // Last packet received from host
 u8 In_Packet[15]  = {0};     // Next packet to sent to host
-extern int DesCur[6];
+extern short int DesCur[6];
 // dev_feedback control word
 #define 	DEV_POS_STA			1
 // USB micro
@@ -159,7 +161,7 @@ void	mCH378Interrupt( void )
 //		printf("INDEX4_OUT \n");
 //		printf("INDEX4_OUT \n");
 		// for performance check
-		GPIO_ToggleBits(GPIOH,GPIO_Pin_11);
+		//GPIO_ToggleBits(GPIOH,GPIO_Pin_11);
 
 		pbuf = Out_Packet;
 		xWriteCH378Cmd( CMD1x_RD_USB_DATA );						/* 从指定USB中断的端点缓冲区读取数据块,并释放缓冲区 */		
@@ -209,6 +211,7 @@ void	mCH378Interrupt( void )
 			{
 				DesCur[i] = (Out_Packet[1+2*i+1]<<8)|(Out_Packet[1+2*i]);			// initial data buffer							
 			}
+			OSSemPost(Sem_NewIOMSG);
 			break;
 		case CTW_SET_POS:
 			for(i=0;i<6;i++)

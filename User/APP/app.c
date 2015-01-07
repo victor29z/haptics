@@ -40,7 +40,15 @@
 #include "stdio.h"
 #include "ch378.h"
 
-int DesCur[6]= {0};//目标电流
+/*
+*********************************************************************************************************
+*                                        GLOBAL VARIABLES
+*********************************************************************************************************
+*/
+
+short int DesCur[6]= {0};//目标电流
+OS_EVENT* Sem_NewIOMSG;
+unsigned char USBActive=0;
 
 
 /*
@@ -77,6 +85,7 @@ PUTCHAR_PROTOTYPE
 static  OS_STK  AppTaskStartStk[APP_CFG_TASK_START_STK_SIZE];
 static  OS_STK  UMon_task_stk[SMALL_TASK_STK_SIZE ];  
 static  OS_STK  Console_task_stk[LARGE_TASK_STK_SIZE ]; 
+static  OS_STK  Motor_task_stk[LARGE_TASK_STK_SIZE ];
 
 
 /*
@@ -86,6 +95,7 @@ static  OS_STK  Console_task_stk[LARGE_TASK_STK_SIZE ];
 */
 
 static  void  AppTaskStart          (void  *p_arg);
+static  void  MotorControl_Task (void *p_arg);
 
 
 /*
@@ -166,6 +176,15 @@ static  void  AppTaskStart (void *p_arg)
 						SMALL_TASK_STK_SIZE,
 						(void *)0,		
 						OS_TASK_OPT_NONE);
+	OSTaskCreateExt(MotorControl_Task,
+						(void *)0,								  
+						&Motor_task_stk[LARGE_TASK_STK_SIZE - 1], 
+						MCTRL_TASK_PRIO, 					
+						MCTRL_TASK_PRIO,
+						&Motor_task_stk[0],						  
+						LARGE_TASK_STK_SIZE,
+						(void *)0,		
+						OS_TASK_OPT_NONE);
 	
 /*
 	OSTaskCreateExt(ConsoleService_task,
@@ -178,8 +197,9 @@ static  void  AppTaskStart (void *p_arg)
 						(void *)0,								
 						OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR);
 	*/
-	mInitCH378Device();
-	
+
+	while(mInitCH378Device() != ERR_SUCCESS)
+		OSTimeDly(300);
 	while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
         //BSP_LED_Toggle(0u);
 		OSTimeDly(50);
@@ -187,4 +207,56 @@ static  void  AppTaskStart (void *p_arg)
     }
 }
 
+#define SET_MOTOR1_PWM(n)	TIM_SetCompare4(TIM1,n)
+#define SET_MOTOR2_PWM(n)	TIM_SetCompare3(TIM1,n)
+#define SET_MOTOR3_PWM(n)	TIM_SetCompare2(TIM1,n)
+#define SET_MOTOR4_PWM(n)	TIM_SetCompare1(TIM1,n)
+#define SET_MOTOR5_PWM(n)	TIM_SetCompare3(TIM8,n)
+#define SET_MOTOR6_PWM(n)	TIM_SetCompare2(TIM8,n)
+#define SET_MOTOR7_PWM(n)	TIM_SetCompare1(TIM8,n)
+
+static  void  MotorControl_Task (void *p_arg)
+{
+   	(void)p_arg;
+   	uint8_t err;
+	uint8_t i;
+   	uint16_t PWMPeriod = (SystemCoreClock / 17570 ) - 1; //set PWM frequency 17.57KHz
+	uint16_t ChannelPulse[6];
+	uint8_t MotorDir[6];
+   	Sem_NewIOMSG = OSSemCreate(0);
+
+   	while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
+		OSSemPend(Sem_NewIOMSG,0,&err);
+		for(i = 0; i < 6; i++){
+			if(DesCur[i] >= 0){
+				MotorDir[i] = 1;
+				//SET_M_DIR(i,1);
+				
+				ChannelPulse[i] = (uint16_t) (((uint32_t) DesCur[i] * (PWMPeriod- 1)) / 32760);
+			}
+			else{
+				MotorDir[i] = 0;
+				//SET_M_DIR(i,0);
+				ChannelPulse[i] = (uint16_t) (((uint32_t) (0 - DesCur[i]) * (PWMPeriod- 1)) / 32760);;
+			}
+			
+			
+		}
+		SET_MOTOR1_PWM(ChannelPulse[0]);
+		SET_M_DIR(1,MotorDir[0]);
+		SET_MOTOR2_PWM(ChannelPulse[1]);
+		SET_M_DIR(2,MotorDir[1]);
+		SET_MOTOR3_PWM(ChannelPulse[2]);
+		SET_M_DIR(3,MotorDir[2]);
+		SET_MOTOR4_PWM(ChannelPulse[3]);
+		SET_M_DIR(4,MotorDir[3]);
+		SET_MOTOR5_PWM(ChannelPulse[4]);
+		SET_M_DIR(5,MotorDir[4]);
+		SET_MOTOR6_PWM(ChannelPulse[5]);
+		SET_M_DIR(6,MotorDir[5]);
+		//ChannelPulse = (uint16_t) (((uint32_t) 100 * (PWMPeriod- 1)) / 1000);
+		
+              
+   }
+}
 

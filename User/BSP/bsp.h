@@ -384,6 +384,60 @@
 #define M1_PWM_PORT		GPIOA
 #define M1_PWM_PIN		GPIO_Pin_11
 
+#define M2_CSN_PORT		GPIOB
+#define M2_CSN_PIN		GPIO_Pin_4
+
+#define M2_DIR_PORT		GPIOE
+#define M2_DIR_PIN		GPIO_Pin_12
+
+#define M2_PWM_PORT		GPIOA
+#define M2_PWM_PIN		GPIO_Pin_10
+
+#define M3_CSN_PORT		GPIOB
+#define M3_CSN_PIN		GPIO_Pin_5
+
+#define M3_DIR_PORT		GPIOE
+#define M3_DIR_PIN		GPIO_Pin_11
+
+#define M3_PWM_PORT		GPIOA
+#define M3_PWM_PIN		GPIO_Pin_9
+
+#define M4_CSN_PORT		GPIOB
+#define M4_CSN_PIN		GPIO_Pin_6
+
+#define M4_DIR_PORT		GPIOE
+#define M4_DIR_PIN		GPIO_Pin_10
+
+#define M4_PWM_PORT		GPIOA
+#define M4_PWM_PIN		GPIO_Pin_8
+
+#define M5_CSN_PORT		GPIOB
+#define M5_CSN_PIN		GPIO_Pin_7
+
+#define M5_DIR_PORT		GPIOE
+#define M5_DIR_PIN		GPIO_Pin_9
+
+#define M5_PWM_PORT		GPIOC
+#define M5_PWM_PIN		GPIO_Pin_8
+
+#define M6_CSN_PORT		GPIOB
+#define M6_CSN_PIN		GPIO_Pin_8
+
+#define M6_DIR_PORT		GPIOE
+#define M6_DIR_PIN		GPIO_Pin_8
+
+#define M6_PWM_PORT		GPIOC
+#define M6_PWM_PIN		GPIO_Pin_7
+
+#define M7_CSN_PORT		GPIOB
+#define M7_CSN_PIN		GPIO_Pin_9
+
+#define M7_DIR_PORT		GPIOE
+#define M7_DIR_PIN		GPIO_Pin_7
+
+#define M7_PWM_PORT		GPIOC
+#define M7_PWM_PIN		GPIO_Pin_6
+
 
 #define DISABLE_MOTOR()     GPIO_SetBits(M_DIS_PORT, M_DIS_PIN)
 #define ENABLE_MOTOR()      GPIO_ResetBits(M_DIS_PORT, M_DIS_PIN)  
@@ -400,6 +454,7 @@
 
 #define SET_M_DIR_HIGH(n)	GPIO_SetBits(M##n##_DIR_PORT, M##n##_DIR_PIN)
 #define SET_M_DIR_LOW(n)	GPIO_ResetBits(M##n##_DIR_PORT, M##n##_DIR_PIN)
+#define SET_M_DIR(n,v)	GPIO_WriteBit(M##n##_DIR_PORT, M##n##_DIR_PIN,v)
 
 /*
 *********************************************************************************************************
@@ -468,4 +523,3 @@ void        BSP_LED_Toggle                    (CPU_INT08U     led);
 
 #endif                                                         
 /* End of module include.                               */
-

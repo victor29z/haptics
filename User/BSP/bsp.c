@@ -85,6 +85,7 @@
 */
 
 
+
 /*
 *********************************************************************************************************
 *                                             REGISTERS
@@ -696,11 +697,11 @@ void PWM_Config(void)
 	/* Compute CCR1 value to generate a duty cycle at 50% for channel 1 and 1N */
 	Channel1Pulse = (uint16_t) (((uint32_t) 0 * (TimerPeriod - 1)) / 10);
 	/* Compute CCR2 value to generate a duty cycle at 37.5%  for channel 2 and 2N */
-	Channel2Pulse = (uint16_t) (((uint32_t) 375 * (TimerPeriod - 1)) / 1000);
+	Channel2Pulse = (uint16_t) (((uint32_t) 0 * (TimerPeriod - 1)) / 1000);
 	/* Compute CCR3 value to generate a duty cycle at 25%  for channel 3 and 3N */
-	Channel3Pulse = (uint16_t) (((uint32_t) 25 * (TimerPeriod - 1)) / 100);
+	Channel3Pulse = (uint16_t) (((uint32_t) 0 * (TimerPeriod - 1)) / 100);
 	/* Compute CCR4 value to generate a duty cycle at 12.5%  for channel 4 */
-	Channel4Pulse = (uint16_t) (((uint32_t) 700 * (TimerPeriod- 1)) / 1000);
+	Channel4Pulse = (uint16_t) (((uint32_t) 0 * (TimerPeriod- 1)) / 1000);
 
 	/* TIM1 clock enable */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1 , ENABLE);
@@ -719,8 +720,8 @@ void PWM_Config(void)
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
 	TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
 	TIM_OCInitStructure.TIM_Pulse = Channel1Pulse;
-	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
-	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_High;
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_Low;
 	TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
 	TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCIdleState_Reset;
 
@@ -740,6 +741,59 @@ void PWM_Config(void)
 
 	/* TIM1 Main Output Enable */
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);
+////////////////////////////////for TIM8 init//////////////////////
+//pin config
+	RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_GPIOC  , ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource6, GPIO_AF_TIM8);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_TIM8);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource8, GPIO_AF_TIM8);
+
+    
+	/* TIM1 clock enable */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8 , ENABLE);
+
+	/* Time Base configuration */
+	TIM_TimeBaseStructure.TIM_Prescaler = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseStructure.TIM_Period = TimerPeriod;
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+
+	TIM_TimeBaseInit(TIM8, &TIM_TimeBaseStructure);
+
+	/* Channel 1, 2,3 and 4 Configuration in PWM mode */
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
+	TIM_OCInitStructure.TIM_Pulse = Channel1Pulse;
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_Low;
+	TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
+	TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCIdleState_Reset;
+
+	TIM_OC1Init(TIM8, &TIM_OCInitStructure);
+
+	TIM_OCInitStructure.TIM_Pulse = Channel2Pulse;
+	TIM_OC2Init(TIM8, &TIM_OCInitStructure);
+
+	TIM_OCInitStructure.TIM_Pulse = Channel3Pulse;
+	TIM_OC3Init(TIM8, &TIM_OCInitStructure);
+
+	/* TIM1 counter enable */
+	TIM_Cmd(TIM8, ENABLE);
+
+	/* TIM1 Main Output Enable */
+	TIM_CtrlPWMOutputs(TIM8, ENABLE);
+
+	
 }
 
 void ENC_Init(void)

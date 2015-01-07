@@ -43,6 +43,8 @@
 #define  APP_CFG_TASK_START_PRIO                25u
 
 #define UMON_TASK_PRIO	                6
+#define MCTRL_TASK_PRIO	                10
+
 #define CONSOLE_TASK_PRIO				22
 
 
