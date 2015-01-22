@@ -197,6 +197,26 @@ void EXTI0_IRQHandler(void)
 	}
 }
 
+void EXTI2_IRQHandler(void)
+{
+	if(EXTI_GetITStatus(EXTI_Line2) != RESET)
+	{
+		/* Clear the EXTI line 1 pending bit */
+		EXTI_ClearITPendingBit(EXTI_Line2);
+
+	}
+}
+
+void EXTI3_IRQHandler(void)
+{
+	if(EXTI_GetITStatus(EXTI_Line3) != RESET)
+	{
+		/* Clear the EXTI line 1 pending bit */
+		EXTI_ClearITPendingBit(EXTI_Line3);
+
+	}
+}
+
 
 /******************************************************************************/
 /*                 STM32F4xx Peripherals Interrupt Handlers                   */

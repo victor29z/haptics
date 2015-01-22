@@ -356,6 +356,13 @@
 #define KEY4_PORT		GPIOA
 #define KEY4_PIN		GPIO_Pin_5
 
+#define KEY1_MASK		0x01
+#define KEY2_MASK		0x02
+#define KEY3_MASK		0x04
+#define KEY4_MASK		0x08
+
+
+
 
 /*
 *********************************************************************************************************
@@ -439,8 +446,8 @@
 #define M7_PWM_PIN		GPIO_Pin_6
 
 
-#define DISABLE_MOTOR()     GPIO_SetBits(M_DIS_PORT, M_DIS_PIN)
-#define ENABLE_MOTOR()      GPIO_ResetBits(M_DIS_PORT, M_DIS_PIN)  
+//#define DISABLE_MOTOR()     GPIO_SetBits(M_DIS_PORT, M_DIS_PIN)
+//#define ENABLE_MOTOR()      GPIO_ResetBits(M_DIS_PORT, M_DIS_PIN)  
 
 #define SET_SCK_HIGH()     GPIO_SetBits(M_SCLK_PORT, M_SCLK_PIN)
 #define SET_SCK_LOW()      GPIO_ResetBits(M_SCLK_PORT, M_SCLK_PIN)  
@@ -455,6 +462,9 @@
 #define SET_M_DIR_HIGH(n)	GPIO_SetBits(M##n##_DIR_PORT, M##n##_DIR_PIN)
 #define SET_M_DIR_LOW(n)	GPIO_ResetBits(M##n##_DIR_PORT, M##n##_DIR_PIN)
 #define SET_M_DIR(n,v)	GPIO_WriteBit(M##n##_DIR_PORT, M##n##_DIR_PIN,v)
+
+#define ENABLE_MOTOR() do{TIM_CtrlPWMOutputs(TIM1, ENABLE);TIM_CtrlPWMOutputs(TIM8, ENABLE);}while(0)
+#define DISABLE_MOTOR() do{TIM_CtrlPWMOutputs(TIM1, DISABLE);TIM_CtrlPWMOutputs(TIM8, DISABLE);}while(0)
 
 /*
 *********************************************************************************************************
@@ -480,7 +490,7 @@ void        BSP_IntDisAll                     (void);
 
 CPU_INT32U  BSP_CPU_ClkFreq                   (void);
 void systick_init(void) ;
-void  BSP_LED_Init(void);
+void  BSP_LED_KEY_Init(void);
 void SetEncoder(uint32_t dat, uint8_t n);
 uint32_t GetEncoder(uint8_t n);
 uint8_t GetKeys(void);

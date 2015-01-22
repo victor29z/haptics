@@ -52,10 +52,6 @@
 #define  BSP_BIT_RCC_PLLCFGR_PLLQ                7u
 
 
-#define  BSP_GPIOG_LED1                        DEF_BIT_06
-#define  BSP_GPIOG_LED2                        DEF_BIT_08
-#define  BSP_GPIOI_LED3                        DEF_BIT_09
-#define  BSP_GPIOC_LED4                        DEF_BIT_07
 
 /*
 *********************************************************************************************************
@@ -186,11 +182,11 @@ void  BSP_Init (void)
     while (RCC_GetSYSCLKSource() != RCC_CFGR_SWS_PLL) {
         ;
     }
-	BSP_LED_Init();
+	BSP_LED_KEY_Init();
 	BSP_MotorControl_Init();
     CH378_Port_Init();
 	PWM_Config();
-	ENABLE_MOTOR();
+	DISABLE_MOTOR();
     ENC_Init();
 #ifdef TRACE_EN                                                 /* See project / compiler preprocessor options.         */
     BSP_CPU_REG_DBGMCU_CR |=  BSP_DBGMCU_CR_TRACE_IOEN_MASK;    /* Enable tracing (see Note #2).                        */
@@ -256,7 +252,7 @@ CPU_INT32U  BSP_CPU_ClkFreq (void)
 *********************************************************************************************************
 */
 
-void  BSP_LED_Init(void)
+void  BSP_LED_KEY_Init(void)
 {
     GPIO_InitTypeDef  gpio_init;
 
@@ -282,6 +278,10 @@ void  BSP_LED_Init(void)
     gpio_init.GPIO_Pin   = LED4_PIN;
     GPIO_Init(LED4_PORT, &gpio_init);
 
+	BSP_LED_Off(0);
+	BSP_LED_Off(1);
+	BSP_LED_Off(2);
+	BSP_LED_Off(3);
 // keys init
 	gpio_init.GPIO_Mode  = GPIO_Mode_IN;
 	
@@ -296,6 +296,34 @@ void  BSP_LED_Init(void)
 	
     gpio_init.GPIO_Pin   = KEY4_PIN;
     GPIO_Init(KEY4_PORT, &gpio_init);
+
+	//interrupt line init
+	EXTI_InitTypeDef   EXTI_InitStructure;
+	NVIC_InitTypeDef   NVIC_InitStructure;
+
+	/* Enable SYSCFG clock */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource2);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource3);
+	
+	EXTI_InitStructure.EXTI_Line = EXTI_Line2;
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;  
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitStructure);
+	
+	EXTI_InitStructure.EXTI_Line = EXTI_Line3;
+	EXTI_Init(&EXTI_InitStructure);
+
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI3_IRQn;
+	NVIC_Init(&NVIC_InitStructure);
 
 }
 
@@ -326,26 +354,20 @@ void  BSP_LED_On (CPU_INT08U  led)
 {
     switch (led) {
         case 0u:
-             GPIO_SetBits(GPIOG, (BSP_GPIOG_LED1 | BSP_GPIOG_LED2));
-             GPIO_SetBits(GPIOI, BSP_GPIOI_LED3);
-             GPIO_SetBits(GPIOC, BSP_GPIOC_LED4);
+             GPIO_ResetBits(LED1_PORT, LED1_PIN);
              break;
 
         case 1u:
-             GPIO_SetBits(GPIOG, BSP_GPIOG_LED1);
+             GPIO_ResetBits(LED2_PORT, LED2_PIN);
              break;
 
         case 2u:
-             GPIO_SetBits(GPIOG, BSP_GPIOG_LED2);
+             GPIO_ResetBits(LED3_PORT, LED3_PIN);
              break;
 
         case 3u:
-             GPIO_SetBits(GPIOI, BSP_GPIOI_LED3);
-             break;
-             
-        case 4u:
-             GPIO_SetBits(GPIOC, BSP_GPIOC_LED4);
-             break;             
+             GPIO_ResetBits(LED4_PORT, LED4_PIN);
+             break;      
 
         default:
              break;
@@ -377,27 +399,22 @@ void  BSP_LED_On (CPU_INT08U  led)
 
 void  BSP_LED_Off (CPU_INT08U led)
 {
-    switch (led) {
+     switch (led) {
         case 0u:
-             GPIO_ResetBits(GPIOH, (GPIO_Pin_2 | GPIO_Pin_3));
-             GPIO_ResetBits(GPIOI, (GPIO_Pin_8 | GPIO_Pin_10));
+             GPIO_SetBits(LED1_PORT, LED1_PIN);
              break;
 
         case 1u:
-             GPIO_ResetBits(GPIOH, GPIO_Pin_2);
+             GPIO_SetBits(LED2_PORT, LED2_PIN);
              break;
 
         case 2u:
-             GPIO_ResetBits(GPIOH, GPIO_Pin_3);
+             GPIO_SetBits(LED3_PORT, LED3_PIN);
              break;
 
         case 3u:
-             GPIO_ResetBits(GPIOI, GPIO_Pin_8);
-             break;
-             
-        case 4u:
-             GPIO_ResetBits(GPIOI, GPIO_Pin_10);
-             break;             
+             GPIO_SetBits(LED4_PORT, LED4_PIN);
+             break;      
 
         default:
              break;
@@ -429,51 +446,22 @@ void  BSP_LED_Off (CPU_INT08U led)
 
 void  BSP_LED_Toggle (CPU_INT08U  led)
 {
-    CPU_INT32U  pins;
-
-
     switch (led) {
         case 0u:
-             pins  =  GPIO_ReadOutputData(GPIOH);
-             pins ^= (GPIO_Pin_2 | GPIO_Pin_3);
-             GPIO_SetBits(  GPIOH,   pins  & (GPIO_Pin_2 | GPIO_Pin_3));
-             GPIO_ResetBits(GPIOH, (~pins) & (GPIO_Pin_2 | GPIO_Pin_3));
-
-			
-	         pins  =  GPIO_ReadOutputData(GPIOI);
-			 pins ^= (GPIO_Pin_8 | GPIO_Pin_10);
-			 GPIO_SetBits(	GPIOI,	 pins  & (GPIO_Pin_8 | GPIO_Pin_10));
-			 GPIO_ResetBits(GPIOI, (~pins) & (GPIO_Pin_8 | GPIO_Pin_10));
-             
+             GPIO_ToggleBits(LED1_PORT, LED1_PIN);
              break;
 
         case 1u:
-             pins  = GPIO_ReadOutputData(GPIOH);
-             pins ^= GPIO_Pin_2;
-             GPIO_SetBits(  GPIOH,   pins  & GPIO_Pin_2);
-             GPIO_ResetBits(GPIOH, (~pins) & GPIO_Pin_2);
+             GPIO_ToggleBits(LED2_PORT, LED2_PIN);
              break;
-             
+
         case 2u:
-             pins  = GPIO_ReadOutputData(GPIOH);
-             pins ^= GPIO_Pin_3;
-             GPIO_SetBits(  GPIOH,   pins  & GPIO_Pin_3);
-             GPIO_ResetBits(GPIOH, (~pins) & GPIO_Pin_3);
+             GPIO_ToggleBits(LED3_PORT, LED3_PIN);
              break;
-             
+
         case 3u:
-             pins  =  GPIO_ReadOutputData(GPIOI);
-             pins ^= GPIO_Pin_8;
-             GPIO_SetBits(  GPIOI,   pins  & GPIO_Pin_8);
-             GPIO_ResetBits(GPIOI, (~pins) & GPIO_Pin_8);
-             break;
-             
-        case 4u:
-             pins  =  GPIO_ReadOutputData(GPIOI);
-             pins ^= GPIO_Pin_10;
-             GPIO_SetBits(  GPIOI,   pins  & GPIO_Pin_10);
-             GPIO_ResetBits(GPIOI, (~pins) & GPIO_Pin_10);
-             break;
+             GPIO_ToggleBits(LED4_PORT, LED4_PIN);
+             break;      
 
         default:
              break;
@@ -661,6 +649,20 @@ static void  BSP_MotorControl_Init(void)
     gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
 
     GPIO_Init(M1_DIR_PORT, &gpio_init);
+	
+	gpio_init.GPIO_Pin   = M2_DIR_PIN;
+    GPIO_Init(M2_DIR_PORT, &gpio_init);
+	gpio_init.GPIO_Pin   = M3_DIR_PIN;
+    GPIO_Init(M3_DIR_PORT, &gpio_init);
+	gpio_init.GPIO_Pin   = M4_DIR_PIN;
+    GPIO_Init(M4_DIR_PORT, &gpio_init);
+	gpio_init.GPIO_Pin   = M5_DIR_PIN;
+    GPIO_Init(M5_DIR_PORT, &gpio_init);
+	gpio_init.GPIO_Pin   = M6_DIR_PIN;
+    GPIO_Init(M6_DIR_PORT, &gpio_init);
+	gpio_init.GPIO_Pin   = M7_DIR_PIN;
+    GPIO_Init(M7_DIR_PORT, &gpio_init);
+
 	SET_M_CSN_LOW(1);
 	SPI_Send_Byte(0x44);
 	SET_M_CSN_HIGH(1);
@@ -981,7 +983,7 @@ uint32_t GetEncoder(uint8_t n){
 }
 
 uint8_t GetKeys(void){
-	uint8_t temp;
+	uint8_t temp = 0;
 	temp = 	GPIO_ReadInputDataBit(KEY1_PORT,KEY1_PIN) | 
 			GPIO_ReadInputDataBit(KEY2_PORT,KEY2_PIN)<<1 |
 			GPIO_ReadInputDataBit(KEY3_PORT,KEY3_PIN)<<2 | 

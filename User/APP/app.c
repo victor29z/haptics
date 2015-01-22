@@ -49,6 +49,7 @@
 short int DesCur[6]= {0};//目标电流
 OS_EVENT* Sem_NewIOMSG;
 unsigned char USBActive=0;
+const unsigned int encCalib[6] = {-3891,-3891,-12809,0,0,0};		// 	initial position for encoder
 
 
 /*
@@ -163,7 +164,7 @@ int main(void)
 static  void  AppTaskStart (void *p_arg)
 {
    (void)p_arg;
-
+	uint8_t i;
     BSP_Init();                                                 /* Initialize BSP functions                             */
 	//BSP_LED_Init();                                             /* Init LEDs.                                           */
 	systick_init();                                            /* Start Tick Initialization                            */
@@ -199,13 +200,22 @@ static  void  AppTaskStart (void *p_arg)
 	*/
 
 	while(mInitCH378Device() != ERR_SUCCESS)
-		OSTimeDly(300);
+		OSTimeDly(20);
+	i = 0;
+	while(!(~(GetKeys()) & KEY1_MASK)){
+		if(i < 30) i++;
+		else{
+			i = 0;
+			BSP_LED_Toggle(0);	
+		}
+		OSTimeDly(1);
+	}
+	for(i=0;i<3;i++)
+		SetEncoder(encCalib[i],i);
+	ENABLE_MOTOR();
 	while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
-        //BSP_LED_Toggle(0u);
-        //GetEncoder(0);
-		//GetEncoder(1);
-		//GetEncoder(2);
-		OSTimeDly(50);
+        
+		OSTimeDly(1);
               
     }
 }
