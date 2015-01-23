@@ -494,6 +494,7 @@ void  BSP_LED_KEY_Init(void);
 void SetEncoder(uint32_t dat, uint8_t n);
 uint32_t GetEncoder(uint8_t n);
 uint8_t GetKeys(void);
+void CalEncoder(void);
 
 
 

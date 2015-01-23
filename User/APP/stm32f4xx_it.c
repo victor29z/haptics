@@ -40,6 +40,8 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+extern OS_EVENT* Sem_KEY2_EVT;
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -203,7 +205,7 @@ void EXTI2_IRQHandler(void)
 	{
 		/* Clear the EXTI line 1 pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line2);
-
+		CalEncoder();
 	}
 }
 
@@ -213,6 +215,7 @@ void EXTI3_IRQHandler(void)
 	{
 		/* Clear the EXTI line 1 pending bit */
 		EXTI_ClearITPendingBit(EXTI_Line3);
+		OSSemPost(Sem_KEY2_EVT); 
 
 	}
 }

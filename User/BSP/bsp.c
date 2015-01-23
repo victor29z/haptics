@@ -982,6 +982,14 @@ uint32_t GetEncoder(uint8_t n){
 	}
 }
 
+const unsigned int encCalib[6] = {-3891,-3891,-12809,0,0,0};		// 	initial position for encoder
+
+void CalEncoder(void){
+	uint8_t i;
+	for(i=0;i<3;i++)
+		SetEncoder(encCalib[i],i);
+}
+
 uint8_t GetKeys(void){
 	uint8_t temp = 0;
 	temp = 	GPIO_ReadInputDataBit(KEY1_PORT,KEY1_PIN) | 

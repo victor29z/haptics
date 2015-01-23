@@ -48,8 +48,13 @@
 
 short int DesCur[6]= {0};//目标电流
 OS_EVENT* Sem_NewIOMSG;
+OS_EVENT* Sem_KEY1_EVT;
+OS_EVENT* Sem_KEY2_EVT;
+
+
 unsigned char USBActive=0;
-const unsigned int encCalib[6] = {-3891,-3891,-12809,0,0,0};		// 	initial position for encoder
+unsigned char ForceEnable=0;
+
 
 
 /*
@@ -165,6 +170,9 @@ static  void  AppTaskStart (void *p_arg)
 {
    (void)p_arg;
 	uint8_t i;
+	uint8_t err;
+	Sem_KEY1_EVT = OSSemCreate(0);
+	Sem_KEY2_EVT = OSSemCreate(0);
     BSP_Init();                                                 /* Initialize BSP functions                             */
 	//BSP_LED_Init();                                             /* Init LEDs.                                           */
 	systick_init();                                            /* Start Tick Initialization                            */
@@ -210,12 +218,23 @@ static  void  AppTaskStart (void *p_arg)
 		}
 		OSTimeDly(1);
 	}
-	for(i=0;i<3;i++)
-		SetEncoder(encCalib[i],i);
+	CalEncoder();
 	ENABLE_MOTOR();
+	ForceEnable = 1;
+	BSP_LED_On(1);
 	while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
-        
-		OSTimeDly(1);
+		OSSemPend(Sem_KEY2_EVT,0,&err);       
+		if(ForceEnable == 0){
+			ForceEnable = 1;
+			ENABLE_MOTOR();
+			BSP_LED_On(1);
+		}
+		else{
+			ForceEnable = 0;
+			DISABLE_MOTOR();
+			BSP_LED_Off(1);
+		}
+		
               
     }
 }
@@ -272,4 +291,6 @@ static  void  MotorControl_Task (void *p_arg)
               
    }
 }
+
+
 
