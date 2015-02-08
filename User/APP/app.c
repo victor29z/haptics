@@ -89,7 +89,7 @@ PUTCHAR_PROTOTYPE
 
                                                                 /* --------------- APPLICATION GLOBALS ---------------- */
 static  OS_STK  AppTaskStartStk[APP_CFG_TASK_START_STK_SIZE];
-static  OS_STK  UMon_task_stk[SMALL_TASK_STK_SIZE ];  
+static  OS_STK  UMon_task_stk[LARGE_TASK_STK_SIZE ];  
 static  OS_STK  Console_task_stk[LARGE_TASK_STK_SIZE ]; 
 static  OS_STK  Motor_task_stk[LARGE_TASK_STK_SIZE ];
 
@@ -178,11 +178,11 @@ static  void  AppTaskStart (void *p_arg)
 	systick_init();                                            /* Start Tick Initialization                            */
     OSTaskCreateExt(UartMonitor_task,
 						(void *)0,								  
-						&UMon_task_stk[SMALL_TASK_STK_SIZE - 1], 
+						&UMon_task_stk[LARGE_TASK_STK_SIZE - 1], 
 						UMON_TASK_PRIO, 					
 						UMON_TASK_PRIO,
 						&UMon_task_stk[0],						  
-						SMALL_TASK_STK_SIZE,
+						LARGE_TASK_STK_SIZE,
 						(void *)0,		
 						OS_TASK_OPT_NONE);
 	OSTaskCreateExt(MotorControl_Task,
@@ -221,19 +221,26 @@ static  void  AppTaskStart (void *p_arg)
 	CalEncoder();
 	ENABLE_MOTOR();
 	ForceEnable = 1;
+	BSP_LED_On(0);
 	BSP_LED_On(1);
 	while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
+		
 		OSSemPend(Sem_KEY2_EVT,0,&err);       
-		if(ForceEnable == 0){
-			ForceEnable = 1;
-			ENABLE_MOTOR();
-			BSP_LED_On(1);
-		}
-		else{
-			ForceEnable = 0;
-			DISABLE_MOTOR();
-			BSP_LED_Off(1);
-		}
+		//if((~(GetKeys()) & KEY1_MASK))
+		//	CalEncoder();
+		//if((~(GetKeys()) & KEY2_MASK))	{
+			if(ForceEnable == 0){
+				ForceEnable = 1;
+				ENABLE_MOTOR();
+				BSP_LED_On(1);
+			}
+			else{
+				ForceEnable = 0;
+				DISABLE_MOTOR();
+				BSP_LED_Off(1);
+			}
+		//}
+		
 		
               
     }
@@ -261,15 +268,15 @@ static  void  MotorControl_Task (void *p_arg)
 		OSSemPend(Sem_NewIOMSG,0,&err);
 		for(i = 0; i < 6; i++){
 			if(DesCur[i] >= 0){
-				MotorDir[i] = 1;
+				MotorDir[i] = 0;
 				//SET_M_DIR(i,1);
 				
 				ChannelPulse[i] = (uint16_t) (((uint32_t) DesCur[i] * (PWMPeriod- 1)) / 32760);
 			}
 			else{
-				MotorDir[i] = 0;
+				MotorDir[i] = 1;
 				//SET_M_DIR(i,0);
-				ChannelPulse[i] = (uint16_t) (((uint32_t) (0 - DesCur[i]) * (PWMPeriod- 1)) / 32760);;
+				ChannelPulse[i] = (uint16_t) (((uint32_t) (0 - DesCur[i]) * (PWMPeriod- 1)) / 32760);
 			}
 			
 			

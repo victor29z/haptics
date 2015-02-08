@@ -203,9 +203,10 @@ void EXTI2_IRQHandler(void)
 {
 	if(EXTI_GetITStatus(EXTI_Line2) != RESET)
 	{
-		/* Clear the EXTI line 1 pending bit */
+		
 		EXTI_ClearITPendingBit(EXTI_Line2);
-		CalEncoder();
+		if((~(GetKeys()) & KEY1_MASK))
+			CalEncoder();
 	}
 }
 
@@ -213,9 +214,10 @@ void EXTI3_IRQHandler(void)
 {
 	if(EXTI_GetITStatus(EXTI_Line3) != RESET)
 	{
-		/* Clear the EXTI line 1 pending bit */
+		
 		EXTI_ClearITPendingBit(EXTI_Line3);
-		OSSemPost(Sem_KEY2_EVT); 
+		if(~(GetKeys()) & KEY2_MASK)
+			OSSemPost(Sem_KEY2_EVT); 
 
 	}
 }

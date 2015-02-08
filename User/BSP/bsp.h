@@ -471,9 +471,9 @@
 *                                             ENCODER DEFINES
 *********************************************************************************************************
 */
-#define ENC1	TIM3
+#define ENC1	TIM4
 #define ENC2	TIM5
-#define ENC3	TIM4
+#define ENC3	TIM3
 
 
 

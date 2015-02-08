@@ -79,6 +79,11 @@
 *                                       LOCAL GLOBAL VARIABLES
 *********************************************************************************************************
 */
+const unsigned int encCalib[6] = {61645,61645,52727,0,0,0}; 	//	initial position for encoder
+//const unsigned int encCalib[6] = {-3891,-3891,-12809,0,0,0};		//	initial position for encoder
+//const unsigned int encCalib[6] = {-7782,-7782,-25618,0,0,0};		//	initial position for encoder
+//const unsigned int encCalib[6] = {32768,32768,32768,0,0,0};
+const unsigned int EncMid[6] = {32768,32768,32768,0,0,0};
 
 
 
@@ -946,48 +951,46 @@ void ENC_Init(void)
 void SetEncoder(uint32_t dat, uint8_t n){
 	switch(n){
 	case 0:
-		ENC1->CNT = dat;
+		ENC1->CNT = dat & 0xffff;
 	break;
 
 	case 1:
-		ENC2->CNT = dat;
+		ENC2->CNT = dat & 0xffff;
 	break;
 
 	case 2:
-		ENC3->CNT = dat;
+		ENC3->CNT = dat & 0xffff;
 	break;
 			
 	}
 }
-unsigned int enc_value[6];
+uint32_t enc_value[6];
 uint32_t GetEncoder(uint8_t n){
 	//for monitor encoder value
-	//enc_value[0] = ENC1->CNT;
-	//enc_value[1] = ENC2->CNT;
-	//enc_value[2] = ENC3->CNT;
+	enc_value[0] = ENC1->CNT ;
+	enc_value[1] = ENC2->CNT ;
+	enc_value[2] = ENC3->CNT ;
 	switch(n){
 	case 0:
 		
-		return ENC1->CNT;
+		return enc_value[0];
 	break;
 
 	case 1:
-		return ENC2->CNT;
+		return enc_value[1];
 	break;
 
 	case 2:
-		return ENC3->CNT;
+		return enc_value[2];
 	break;
 			
 	}
 }
-
-const unsigned int encCalib[6] = {-3891,-3891,-12809,0,0,0};		// 	initial position for encoder
 
 void CalEncoder(void){
 	uint8_t i;
 	for(i=0;i<3;i++)
-		SetEncoder(encCalib[i],i);
+		SetEncoder(EncMid[i],i);
 }
 
 uint8_t GetKeys(void){

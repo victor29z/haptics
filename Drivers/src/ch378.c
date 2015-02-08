@@ -224,9 +224,9 @@ void	mCH378Interrupt( void )
 		case CTW_SET_POS:
 			for(i=0;i<6;i++)
 			{
-				u32Temp =(Out_Packet[2*i+2]<<8)|Out_Packet[2*i+1];
+				//u32Temp =(Out_Packet[2*i+2]<<8)|Out_Packet[2*i+1];
 				//?/Write_7166_PR(u32Temp,i+ENC_STA); // ENC_STA +5 route
-				SetEncoder(u32Temp,i);
+				//SetEncoder(u32Temp,i);
 			}
 			break;
 		default:

@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=1362659999
+Checksum=-1675002129
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -38,6 +38,8 @@ ITMportsLogFile=0
 ITMlogFile=$PROJ_DIR$\ITM.log
 [array_types]
 Fmt0=int[6]	3	0
+Fmt1=u8[15]	4	0
+Fmt2=uint32_t[6]	3	0
 [watch_formats]
 Fmt0={W}0:USBActive	3	0
 [Trace2]
@@ -86,8 +88,10 @@ mode=0
 [Breakpoints2]
 Bp0=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\stm32f4xx_it.c}.82.3" 0 0 1 "" 0 "" 0
 Bp1=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\stm32f4xx_it.c}.69.3" 0 0 1 "" 0 "" 0
-Bp2=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\app.c}.224.2" 0 0 1 "" 0 "" 0
-Count=3
+Bp2=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\app.c}.232.4" 0 0 1 "" 0 "" 0
+Bp3=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\app.c}.232.4" 0 0 1 "" 0 "" 0
+Bp4=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\Drivers\src\ch378.c}.66.2" 0 0 1 "" 0 "" 0
+Count=5
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
