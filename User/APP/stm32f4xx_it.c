@@ -41,7 +41,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 extern OS_EVENT* Sem_KEY2_EVT;
-
+extern uint16_t enc_value_ext[5];
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -170,12 +170,67 @@ void USART2_IRQHandler(void)
 	serial_isr(1);
 	OSIntExit();    
 }
+
+
+#define RECV_STA_WAIT1ST	0x01
+#define RECV_STA_WAIT2ND	0x02
+#define RECV_STA_DMA		0x03
+
+static uint8_t recv_sta = RECV_STA_WAIT1ST;
+
 void USART3_IRQHandler(void)
 {
+	uint8_t ushTemp;
+	
 	OSIntEnter();
-	serial_isr(2);
+	
+	if(USART_GetFlagStatus(USART3, USART_FLAG_ORE) != RESET)
+	{//同  @arg USART_IT_ORE_ER : OverRun Error interrupt if the EIE bit is set  
+		ushTemp = USART_ReceiveData(USART3); //取出来扔掉
+		USART_ClearFlag(USART3, USART_FLAG_ORE);
+	}
+	
+	if(USART_GetFlagStatus(USART3, USART_FLAG_NE) != RESET)
+	{//同  @arg USART_IT_NE 	: Noise Error interrupt
+		USART_ClearFlag(USART3, USART_FLAG_NE);
+	}
+	
+	
+	if(USART_GetFlagStatus(USART3, USART_FLAG_FE) != RESET)
+	{//同	@arg USART_IT_FE	 : Framing Error interrupt
+		USART_ClearFlag(USART3, USART_FLAG_FE);
+	}
+	
+	if(USART_GetFlagStatus(USART3, USART_FLAG_PE) != RESET)
+	{//同  @arg USART_IT_PE 	: Parity Error interrupt
+		USART_ClearFlag(USART3, USART_FLAG_PE);
+	}
+	/**/
+	if(USART_GetFlagStatus(USART3, USART_FLAG_RXNE) != RESET)
+	{
+		ushTemp = USART_ReceiveData(USART3); 
+		USART_ClearFlag(USART3, USART_FLAG_RXNE);
+		switch(recv_sta){
+			case RECV_STA_WAIT1ST:
+				if(ushTemp == 0x5a) recv_sta = RECV_STA_WAIT2ND;
+			break;
+			case RECV_STA_WAIT2ND:
+				if((ushTemp&0xfc) == 0xa8){
+					 recv_sta = RECV_STA_DMA;
+					 DMA_Cmd(DMA1_Stream1,ENABLE);
+					 USART_ITConfig(USART3,USART_IT_RXNE,DISABLE); 
+					 
+				}
+			break;
+			default:
+				recv_sta = RECV_STA_WAIT1ST;
+			
+		}
+		
+	}
 	OSIntExit();    
 }
+
 void UART4_IRQHandler(void)
 {
 	OSIntEnter();
@@ -221,6 +276,21 @@ void EXTI3_IRQHandler(void)
 
 	}
 }
+
+void DMA1_Stream1_IRQHandler(void)  
+{  
+    if(DMA_GetITStatus(DMA1_Stream1,DMA_IT_TCIF1) != RESET)   
+    {  
+        //清除标志位  
+        DMA_ClearFlag(DMA1_Stream1,DMA_FLAG_TCIF1); 
+		/**/
+		recv_sta = RECV_STA_WAIT1ST;
+		DMA_Cmd(DMA1_Stream1,DISABLE);
+		USART_ITConfig(USART3,USART_IT_RXNE,ENABLE);
+		
+    }  
+}  
+   
 
 
 /******************************************************************************/

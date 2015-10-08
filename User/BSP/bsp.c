@@ -84,6 +84,7 @@ const unsigned int encCalib[6] = {61645,61645,52727,0,0,0}; 	//	initial position
 //const unsigned int encCalib[6] = {-7782,-7782,-25618,0,0,0};		//	initial position for encoder
 //const unsigned int encCalib[6] = {32768,32768,32768,0,0,0};
 const unsigned int EncMid[6] = {32768,32768,32768,0,0,0};
+uint16_t enc_value_ext[5];
 
 
 
@@ -125,6 +126,7 @@ static void  CH378_Port_Init(void);
 static void PWM_Config(void);
 static void ENC_Init(void);
 static void  BSP_MotorControl_Init(void);
+static void BSP_UART_DMA_Init(void)  ;
 
 
 
@@ -193,6 +195,7 @@ void  BSP_Init (void)
 	PWM_Config();
 	DISABLE_MOTOR();
     ENC_Init();
+	BSP_UART_DMA_Init();
 #ifdef TRACE_EN                                                 /* See project / compiler preprocessor options.         */
     BSP_CPU_REG_DBGMCU_CR |=  BSP_DBGMCU_CR_TRACE_IOEN_MASK;    /* Enable tracing (see Note #2).                        */
     BSP_CPU_REG_DBGMCU_CR &= ~BSP_DBGMCU_CR_TRACE_MODE_MASK;    /* Clr trace mode sel bits.                             */
@@ -537,6 +540,11 @@ static void  CH378_Port_Init(void)
     GPIO_Init(CH378_nPCS_PORT, &gpio_init);
 	CH378_SET_nPCS();
 
+	// RESET
+	gpio_init.GPIO_Pin   = CH378_nRES_PIN;
+	GPIO_Init(CH378_nRES_PORT, &gpio_init);
+	CH378_SET_nRES();
+	
 	//interrupt line init
 	EXTI_InitTypeDef   EXTI_InitStructure;
 	NVIC_InitTypeDef   NVIC_InitStructure;
@@ -582,7 +590,7 @@ static void SPI_Send_Byte(uint8_t dat){
 static void  BSP_MotorControl_Init(void)
 {
 	GPIO_InitTypeDef  gpio_init;
-	SPI_InitTypeDef  SPI_InitStructure;
+	//SPI_InitTypeDef  SPI_InitStructure;
 	BSP_PeriphEn(BSP_PERIPH_ID_GPIOA);
 	BSP_PeriphEn(BSP_PERIPH_ID_GPIOB);
 	BSP_PeriphEn(BSP_PERIPH_ID_GPIOD);
@@ -591,7 +599,7 @@ static void  BSP_MotorControl_Init(void)
 	
 
 	/*!< Enable the SPI clock */
-	BSP_PeriphEn(BSP_PERIPH_ID_SPI2);
+	//BSP_PeriphEn(BSP_PERIPH_ID_SPI2);
 
 	
 	/*!< SPI pins configuration *************************************************/
@@ -608,7 +616,7 @@ static void  BSP_MotorControl_Init(void)
 
     GPIO_Init(M_DIS_PORT, &gpio_init);
 	DISABLE_MOTOR();
-	
+/*	
 	// MOSI
 	gpio_init.GPIO_Pin   = M_SDI_PIN;
     gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
@@ -635,17 +643,35 @@ static void  BSP_MotorControl_Init(void)
     gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
 
     GPIO_Init(M_SDO_PORT, &gpio_init);
-
-	// CS1
-	gpio_init.GPIO_Pin   = M1_CSN_PIN;
+*/
+	// DIS
+	gpio_init.GPIO_Pin   = M1_DIS_PIN;
     gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
     gpio_init.GPIO_OType = GPIO_OType_PP;
     gpio_init.GPIO_PuPd  = GPIO_PuPd_UP;
     gpio_init.GPIO_Speed = GPIO_Speed_100MHz;
 
-    GPIO_Init(M1_CSN_PORT, &gpio_init);
+    GPIO_Init(M1_DIS_PORT, &gpio_init);
 
-	SET_M_CSN_HIGH(1);
+	gpio_init.GPIO_Pin   = M2_DIS_PIN;
+	GPIO_Init(M2_DIS_PORT, &gpio_init);
+
+	gpio_init.GPIO_Pin   = M3_DIS_PIN;
+	GPIO_Init(M3_DIS_PORT, &gpio_init);
+
+	gpio_init.GPIO_Pin   = M4_DIS_PIN;
+	GPIO_Init(M4_DIS_PORT, &gpio_init);
+
+	gpio_init.GPIO_Pin   = M5_DIS_PIN;
+	GPIO_Init(M5_DIS_PORT, &gpio_init);
+
+	gpio_init.GPIO_Pin   = M6_DIS_PIN;
+	GPIO_Init(M6_DIS_PORT, &gpio_init);
+
+	gpio_init.GPIO_Pin   = M7_DIS_PIN;
+	GPIO_Init(M7_DIS_PORT, &gpio_init);
+
+	//SET_M_CSN_HIGH(1);
 
 	gpio_init.GPIO_Pin   = M1_DIR_PIN;
     gpio_init.GPIO_Mode  = GPIO_Mode_OUT;
@@ -668,9 +694,9 @@ static void  BSP_MotorControl_Init(void)
 	gpio_init.GPIO_Pin   = M7_DIR_PIN;
     GPIO_Init(M7_DIR_PORT, &gpio_init);
 
-	SET_M_CSN_LOW(1);
-	SPI_Send_Byte(0x44);
-	SET_M_CSN_HIGH(1);
+	//SET_M_CSN_LOW(1);
+	//SPI_Send_Byte(0x44);
+	//SET_M_CSN_HIGH(1);
 
 	SET_M_DIR_HIGH(1);
 
@@ -808,7 +834,7 @@ void ENC_Init(void)
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;  
 	TIM_ICInitTypeDef TIM_ICInitStructure;  
 	GPIO_InitTypeDef GPIO_InitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
+	//NVIC_InitTypeDef NVIC_InitStructure;
 
 // ENC1 init
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
@@ -947,6 +973,13 @@ void ENC_Init(void)
 
 
 }
+#define EXTCMD_HEAD		0xaa
+#define EXTCMD_SET_ENC1	0xe0
+#define EXTCMD_SET_ENC2	0xe1
+#define EXTCMD_SET_ENC3	0xe2
+#define EXTCMD_SET_ENC4	0xe3
+
+
 
 void SetEncoder(uint32_t dat, uint8_t n){
 	switch(n){
@@ -961,6 +994,40 @@ void SetEncoder(uint32_t dat, uint8_t n){
 	case 2:
 		ENC3->CNT = dat & 0xffff;
 	break;
+	case 3:
+		USART_SendData(USART3,EXTCMD_HEAD);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART3,EXTCMD_SET_ENC1);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART3,dat&0xff);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART3,(dat>>8)&0xff);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		
+	break;
+	case 4:
+		USART_SendData(USART3,EXTCMD_HEAD);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART3,EXTCMD_SET_ENC2);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART3,dat&0xff);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART3,(dat>>8)&0xff);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		
+	break;
+	case 5:
+		USART_SendData(USART3,EXTCMD_HEAD);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART3,EXTCMD_SET_ENC3);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART3,dat&0xff);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		USART_SendData(USART3,(dat>>8)&0xff);
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+		
+	break;
+	
 			
 	}
 }
@@ -983,13 +1050,22 @@ uint32_t GetEncoder(uint8_t n){
 	case 2:
 		return enc_value[2];
 	break;
+	case 3:
+		return enc_value_ext[1];
+	break;
+	case 4:
+		return enc_value_ext[2];
+	break;
+	case 5:
+		return enc_value_ext[3];
+	break;
 			
 	}
 }
 
 void CalEncoder(void){
 	uint8_t i;
-	for(i=0;i<3;i++)
+	for(i=0;i<6;i++)
 		SetEncoder(EncMid[i],i);
 }
 
@@ -998,7 +1074,176 @@ uint8_t GetKeys(void){
 	temp = 	GPIO_ReadInputDataBit(KEY1_PORT,KEY1_PIN) | 
 			GPIO_ReadInputDataBit(KEY2_PORT,KEY2_PIN)<<1 |
 			GPIO_ReadInputDataBit(KEY3_PORT,KEY3_PIN)<<2 | 
-			GPIO_ReadInputDataBit(KEY4_PORT,KEY4_PIN)<<3;
+			GPIO_ReadInputDataBit(KEY4_PORT,KEY4_PIN)<<3 |
+			(enc_value_ext[0]&0x0003)<<4;
+}
+
+
+
+static void BSP_UART_DMA_Init(void)  
+{  
+    //定义中断结构体  
+    NVIC_InitTypeDef NVIC_InitStructure ;  
+    //定义IO初始化结构体  
+    GPIO_InitTypeDef GPIO_InitStructure;  
+    //定义串口结构体    
+    USART_InitTypeDef USART_InitStructure;  
+    //定义DMA结构体  
+    DMA_InitTypeDef DMA_InitStructure;  
+  
+    //打开串口对应的外设时钟    
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);  
+       
+    //串口发DMA配置    
+    //启动DMA时钟  
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);  
+    //DMA发送中断设置  
+    NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream1_IRQn;  
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;  
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;  
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;  
+    NVIC_Init(&NVIC_InitStructure);  
+    //DMA通道配置  
+    DMA_DeInit(DMA1_Stream1);  
+    DMA_InitStructure.DMA_Channel = DMA_Channel_4;   
+    //外设地址  
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART3->DR);  
+    //内存地址  
+    DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)enc_value_ext;  
+    //dma传输方向  
+    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;  
+    //设置DMA在传输时缓冲区的长度  
+    DMA_InitStructure.DMA_BufferSize = 10;  
+    //设置DMA的外设递增模式，一个外设  
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;  
+    //设置DMA的内存递增模式  
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;  
+    //外设数据字长  
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;  
+    //内存数据字长  
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_PeripheralDataSize_Byte;  
+    //设置DMA的传输模式  
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;  
+    //设置DMA的优先级别  
+    DMA_InitStructure.DMA_Priority = DMA_Priority_High;  
+      
+    //指定如果FIFO模式或直接模式将用于指定的流 ： 不使能FIFO模式    
+    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;      
+    //指定了FIFO阈值水平  
+    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;          
+    //指定的Burst转移配置内存传输   
+    DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;         
+    //指定的Burst转移配置外围转移 */    
+    DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;   
+  
+    //配置DMA1的通道           
+    DMA_Init(DMA1_Stream1, &DMA_InitStructure);    
+    //使能中断  
+    DMA_ITConfig(DMA1_Stream1,DMA_IT_TC,ENABLE);     
+  
+/*
+	//串口收DMA配置    
+    //启动DMA时钟  
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);  
+    //DMA通道配置  
+    DMA_DeInit(DMA1_Stream5);  
+    DMA_InitStructure.DMA_Channel = DMA_Channel_4;  
+    //外设地址  
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART2->DR);  
+    //内存地址  
+    DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)Rx_Buf_Gsm;  
+    //dma传输方向  
+    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;  
+    //设置DMA在传输时缓冲区的长度  
+    DMA_InitStructure.DMA_BufferSize = RX_LEN_GSM;  
+    //设置DMA的外设递增模式，一个外设  
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;  
+    //设置DMA的内存递增模式  
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;  
+    //外设数据字长  
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;  
+    //内存数据字长  
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;  
+    //设置DMA的传输模式  
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;  
+    //设置DMA的优先级别  
+    DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;  
+      
+    //指定如果FIFO模式或直接模式将用于指定的流 ： 不使能FIFO模式    
+    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;      
+    //指定了FIFO阈值水平  
+    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;          
+    //指定的Burst转移配置内存传输   
+    DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;         
+    //指定的Burst转移配置外围转移 
+    DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;   
+      
+    //配置DMA1的通道           
+    DMA_Init(DMA1_Stream5, &DMA_InitStructure);    
+    //使能通道  
+    DMA_Cmd(DMA1_Stream5,ENABLE);  
+*/      
+    //初始化串口参数    
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b;    
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;    
+    USART_InitStructure.USART_Parity = USART_Parity_No;    
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;    
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;      
+    USART_InitStructure.USART_BaudRate = 115200;   
+    //初始化串口   
+    USART_Init(USART3,&USART_InitStructure);    
+      
+    
+  
+    //配置中断    
+    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;               //通道设置为串口中断    
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;       //中断占先等级  
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;              //中断响应优先级   
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;                 //打开中断    
+    NVIC_Init(&NVIC_InitStructure);     
+          
+	//采用DMA方式接收  
+    USART_DMACmd(USART3,USART_DMAReq_Rx,ENABLE);  
+    USART_DMACmd(USART3,USART_DMAReq_Tx,DISABLE);      
+  
+    //中断配置  
+    USART_ITConfig(USART3,USART_IT_TC,DISABLE);  
+    USART_ITConfig(USART3,USART_IT_RXNE,ENABLE);  
+    USART_ITConfig(USART3,USART_IT_TXE,DISABLE); 
+	USART_ITConfig(USART3, USART_IT_PE, ENABLE);    //开启PE错误接收中断Bit 8PEIE: PE interrupt enable
+  	//CR2 开启ERR中断
+  	USART_ITConfig(USART3, USART_IT_ERR, ENABLE);
+    //USART_ITConfig(USART3,USART_IT_IDLE,ENABLE);    
+    //启动串口    
+    USART_Cmd(USART3, ENABLE);      
+  
+    //设置IO口时钟        
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);   
+    GPIO_PinAFConfig(GPIOD,GPIO_PinSource8,GPIO_AF_USART3);    
+    GPIO_PinAFConfig(GPIOD,GPIO_PinSource9,GPIO_AF_USART3);  
+  
+    //管脚模式:输出口  
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;      
+    //类型:推挽模式  
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;    
+    //上拉下拉设置  
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;      
+    //IO口速度  
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;  
+    //管脚指定  
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;  
+    //初始化  
+    GPIO_Init(GPIOD, &GPIO_InitStructure);  
+      
+    //管脚模式:输入口  
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;      
+    //上拉下拉设置  
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;      
+    //管脚指定  
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;  
+    //初始化  
+    GPIO_Init(GPIOD, &GPIO_InitStructure); 
+	DMA_Cmd(DMA1_Stream1,DISABLE);  
 }
 
 /*

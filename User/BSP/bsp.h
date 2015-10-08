@@ -311,6 +311,10 @@
 #define CH378_nPCS_PORT		GPIOE
 #define CH378_nPCS_PIN		GPIO_Pin_2
 
+#define CH378_nRES_PORT		GPIOE
+#define CH378_nRES_PIN		GPIO_Pin_5
+
+
 #define CH378_SET_A0()			GPIO_SetBits(CH378_A0_PORT,CH378_A0_PIN)
 #define CH378_RESET_A0()		GPIO_ResetBits(CH378_A0_PORT,CH378_A0_PIN)
 
@@ -322,6 +326,9 @@
 
 #define CH378_SET_nPCS()		GPIO_SetBits(CH378_nPCS_PORT,CH378_nPCS_PIN)
 #define CH378_RESET_nPCS()		GPIO_ResetBits(CH378_nPCS_PORT,CH378_nPCS_PIN)
+
+#define CH378_SET_nRES()		GPIO_SetBits(CH378_nRES_PORT,CH378_nRES_PIN)
+#define CH378_RESET_nRES()		GPIO_ResetBits(CH378_nRES_PORT,CH378_nRES_PIN)
 
 #define CH378_WRITE_DB(dat)		do{u16 temp = CH378_DAT_PORT->ODR&0xff00;temp+=dat;CH378_DAT_PORT->ODR=temp;}while(0)
 #define CH378_READ_DB()			((CH378_DAT_PORT->IDR)&0xff)
@@ -382,8 +389,8 @@
 #define M_SDO_PORT		GPIOB
 #define M_SDO_PIN		GPIO_Pin_14
 
-#define M1_CSN_PORT		GPIOB
-#define M1_CSN_PIN		GPIO_Pin_3
+#define M1_DIS_PORT		GPIOB
+#define M1_DIS_PIN		GPIO_Pin_3
 
 #define M1_DIR_PORT		GPIOE
 #define M1_DIR_PIN		GPIO_Pin_13
@@ -391,8 +398,8 @@
 #define M1_PWM_PORT		GPIOA
 #define M1_PWM_PIN		GPIO_Pin_11
 
-#define M2_CSN_PORT		GPIOB
-#define M2_CSN_PIN		GPIO_Pin_4
+#define M2_DIS_PORT		GPIOB
+#define M2_DIS_PIN		GPIO_Pin_4
 
 #define M2_DIR_PORT		GPIOE
 #define M2_DIR_PIN		GPIO_Pin_12
@@ -400,8 +407,8 @@
 #define M2_PWM_PORT		GPIOA
 #define M2_PWM_PIN		GPIO_Pin_10
 
-#define M3_CSN_PORT		GPIOB
-#define M3_CSN_PIN		GPIO_Pin_5
+#define M3_DIS_PORT		GPIOB
+#define M3_DIS_PIN		GPIO_Pin_5
 
 #define M3_DIR_PORT		GPIOE
 #define M3_DIR_PIN		GPIO_Pin_11
@@ -409,8 +416,8 @@
 #define M3_PWM_PORT		GPIOA
 #define M3_PWM_PIN		GPIO_Pin_9
 
-#define M4_CSN_PORT		GPIOB
-#define M4_CSN_PIN		GPIO_Pin_6
+#define M4_DIS_PORT		GPIOB
+#define M4_DIS_PIN		GPIO_Pin_6
 
 #define M4_DIR_PORT		GPIOE
 #define M4_DIR_PIN		GPIO_Pin_10
@@ -418,8 +425,8 @@
 #define M4_PWM_PORT		GPIOA
 #define M4_PWM_PIN		GPIO_Pin_8
 
-#define M5_CSN_PORT		GPIOB
-#define M5_CSN_PIN		GPIO_Pin_7
+#define M5_DIS_PORT		GPIOB
+#define M5_DIS_PIN		GPIO_Pin_7
 
 #define M5_DIR_PORT		GPIOE
 #define M5_DIR_PIN		GPIO_Pin_9
@@ -427,8 +434,8 @@
 #define M5_PWM_PORT		GPIOC
 #define M5_PWM_PIN		GPIO_Pin_8
 
-#define M6_CSN_PORT		GPIOB
-#define M6_CSN_PIN		GPIO_Pin_8
+#define M6_DIS_PORT		GPIOB
+#define M6_DIS_PIN		GPIO_Pin_8
 
 #define M6_DIR_PORT		GPIOE
 #define M6_DIR_PIN		GPIO_Pin_8
@@ -436,8 +443,8 @@
 #define M6_PWM_PORT		GPIOC
 #define M6_PWM_PIN		GPIO_Pin_7
 
-#define M7_CSN_PORT		GPIOB
-#define M7_CSN_PIN		GPIO_Pin_9
+#define M7_DIS_PORT		GPIOB
+#define M7_DIS_PIN		GPIO_Pin_9
 
 #define M7_DIR_PORT		GPIOE
 #define M7_DIR_PIN		GPIO_Pin_7
@@ -458,6 +465,10 @@
 
 #define SET_M_CSN_HIGH(n)	GPIO_SetBits(M##n##_CSN_PORT, M##n##_CSN_PIN)
 #define SET_M_CSN_LOW(n)	GPIO_ResetBits(M##n##_CSN_PORT, M##n##_CSN_PIN)
+
+#define SET_M_DIS_HIGH(n)	GPIO_SetBits(M##n##_DIS_PORT, M##n##_DIS_PIN)
+#define SET_M_DIS_LOW(n)	GPIO_ResetBits(M##n##_DIS_PORT, M##n##_DIS_PIN)
+
 
 #define SET_M_DIR_HIGH(n)	GPIO_SetBits(M##n##_DIR_PORT, M##n##_DIR_PIN)
 #define SET_M_DIR_LOW(n)	GPIO_ResetBits(M##n##_DIR_PORT, M##n##_DIR_PIN)

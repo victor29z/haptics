@@ -207,8 +207,12 @@ static  void  AppTaskStart (void *p_arg)
 						OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR);
 	*/
 
-	while(mInitCH378Device() != ERR_SUCCESS)
+	while(mInitCH378Device() != ERR_SUCCESS){
+		
 		OSTimeDly(20);
+		
+	}
+		
 	i = 0;
 	while(!(~(GetKeys()) & KEY1_MASK)){
 		if(i < 30) i++;
@@ -283,16 +287,22 @@ static  void  MotorControl_Task (void *p_arg)
 		}
 		SET_MOTOR1_PWM(ChannelPulse[0]);
 		SET_M_DIR(1,MotorDir[0]);
+		SET_M_DIS_HIGH(1);
 		SET_MOTOR2_PWM(ChannelPulse[1]);
 		SET_M_DIR(2,MotorDir[1]);
+		SET_M_DIS_HIGH(2);
 		SET_MOTOR3_PWM(ChannelPulse[2]);
 		SET_M_DIR(3,MotorDir[2]);
+		SET_M_DIS_HIGH(3);
 		SET_MOTOR4_PWM(ChannelPulse[3]);
 		SET_M_DIR(4,MotorDir[3]);
+		SET_M_DIS_HIGH(4);
 		SET_MOTOR5_PWM(ChannelPulse[4]);
 		SET_M_DIR(5,MotorDir[4]);
+		SET_M_DIS_HIGH(5);
 		SET_MOTOR6_PWM(ChannelPulse[5]);
 		SET_M_DIR(6,MotorDir[5]);
+		SET_M_DIS_HIGH(6);
 		//ChannelPulse = (uint16_t) (((uint32_t) 100 * (PWMPeriod- 1)) / 1000);
 		
               

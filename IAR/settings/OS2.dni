@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=-1675002129
+Checksum=-1240957837
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -22,10 +22,10 @@ CStepIntDis=_ 0
 [SWOTraceHWSettings]
 OverrideDefaultClocks=0
 CpuClock=168000000
-ClockAutoDetect=1
-ClockWanted=6000000
-JtagSpeed=6000000
-Prescaler=28
+ClockAutoDetect=0
+ClockWanted=2000000
+JtagSpeed=2000000
+Prescaler=84
 TimeStampPrescIndex=0
 TimeStampPrescData=0
 PcSampCYCTAP=1
@@ -36,10 +36,31 @@ ITMportsEnable=0
 ITMportsTermIO=0
 ITMportsLogFile=0
 ITMlogFile=$PROJ_DIR$\ITM.log
+[PowerLog]
+LogEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=0
+Title_0=I0
+Symbol_0=0 4 1
+LiveEnabled=0
+LiveFile=PowerLogLive.log
+[EventLog]
+LogEnabled=0
+SumEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=1
+SumSortOrder=0
+[PowerProbe]
+Frequency=10000
+Probe0=I0
+ProbeSetup0=2 1 1 2 0 0
 [array_types]
 Fmt0=int[6]	3	0
 Fmt1=u8[15]	4	0
-Fmt2=uint32_t[6]	3	0
+Fmt2=uint16_t[5]	4	0
+Fmt3=uint32_t[6]	3	0
 [watch_formats]
 Fmt0={W}0:USBActive	3	0
 [Trace2]
@@ -54,28 +75,12 @@ EventEXC=0
 EventFOLD=0
 EventLSU=0
 EventSLEEP=0
-[PowerLog]
-LogEnabled=0
-GraphEnabled=0
-ShowTimeLog=1
-ShowTimeSum=0
-Title_0=I0
-Symbol_0=0 4 1
-LiveEnabled=0
-LiveFile=PowerLogLive.log
 [DataLog]
 LogEnabled=0
 SumEnabled=0
 GraphEnabled=0
 ShowTimeLog=1
 ShowTimeSum=1
-[EventLog]
-LogEnabled=0
-SumEnabled=0
-GraphEnabled=0
-ShowTimeLog=1
-ShowTimeSum=1
-SumSortOrder=0
 [InterruptLog]
 LogEnabled=0
 SumEnabled=0
@@ -88,10 +93,7 @@ mode=0
 [Breakpoints2]
 Bp0=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\stm32f4xx_it.c}.82.3" 0 0 1 "" 0 "" 0
 Bp1=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\stm32f4xx_it.c}.69.3" 0 0 1 "" 0 "" 0
-Bp2=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\app.c}.232.4" 0 0 1 "" 0 "" 0
-Bp3=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\app.c}.232.4" 0 0 1 "" 0 "" 0
-Bp4=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\Drivers\src\ch378.c}.66.2" 0 0 1 "" 0 "" 0
-Count=5
+Count=2
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -104,10 +106,6 @@ Count=0
 SuppressDialog=0
 [CallStackLog]
 Enabled=0
-[PowerProbe]
-Frequency=10000
-Probe0=I0
-ProbeSetup0=2 1 1 2 0 0
 [DriverProfiling]
 Enabled=0
 Mode=3
