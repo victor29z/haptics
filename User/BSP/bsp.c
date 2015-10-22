@@ -1051,13 +1051,13 @@ uint32_t GetEncoder(uint8_t n){
 		return enc_value[2];
 	break;
 	case 3:
-		return enc_value_ext[1];
+		return enc_value_ext[3];
 	break;
 	case 4:
-		return enc_value_ext[2];
+		return enc_value_ext[1];
 	break;
 	case 5:
-		return enc_value_ext[3];
+		return enc_value_ext[2];
 	break;
 			
 	}
