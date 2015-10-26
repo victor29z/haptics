@@ -83,7 +83,7 @@ const unsigned int encCalib[6] = {61645,61645,52727,0,0,0}; 	//	initial position
 //const unsigned int encCalib[6] = {-3891,-3891,-12809,0,0,0};		//	initial position for encoder
 //const unsigned int encCalib[6] = {-7782,-7782,-25618,0,0,0};		//	initial position for encoder
 //const unsigned int encCalib[6] = {32768,32768,32768,0,0,0};
-const unsigned int EncMid[6] = {32768,32768,32768,0,0,0};
+const unsigned int EncMid[6] = {32768,32768,32768,32768,32768,32768};
 uint16_t enc_value_ext[5];
 
 
