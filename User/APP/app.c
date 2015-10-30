@@ -169,7 +169,8 @@ int main(void)
 static  void  AppTaskStart (void *p_arg)
 {
    (void)p_arg;
-	uint8_t i;
+	uint16_t i;
+	int initial_torque;
 	uint8_t err;
 	Sem_KEY1_EVT = OSSemCreate(0);
 	Sem_KEY2_EVT = OSSemCreate(0);
@@ -212,8 +213,18 @@ static  void  AppTaskStart (void *p_arg)
 		OSTimeDly(20);
 		
 	}
-		
+	ENABLE_MOTOR();	
+	ForceEnable = 1;
 	i = 0;
+	initial_torque = 2000;
+	for(i = 0; i < 100; i++){
+		DesCur[3] = initial_torque;
+		DesCur[4] = -initial_torque;
+		DesCur[5] = -initial_torque;
+		OSSemPost(Sem_NewIOMSG);
+		OSTimeDly(2);
+		initial_torque += 100;
+	}
 	while(!(~(GetKeys()) & KEY1_MASK)){
 		if(i < 30) i++;
 		else{
@@ -223,10 +234,14 @@ static  void  AppTaskStart (void *p_arg)
 		OSTimeDly(1);
 	}
 	CalEncoder();
-	ENABLE_MOTOR();
-	ForceEnable = 1;
+	
+	
 	BSP_LED_On(0);
 	BSP_LED_On(1);
+	DesCur[3] = 0;
+	DesCur[4] = 0;
+	DesCur[5] = 0;
+	OSSemPost(Sem_NewIOMSG);
 	while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
 		
 		OSSemPend(Sem_KEY2_EVT,0,&err);       
