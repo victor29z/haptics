@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=-493969007
+Checksum=1766185670
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -103,9 +103,12 @@ Exclusions=
 [Disassemble mode]
 mode=0
 [Breakpoints2]
-Bp0=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\stm32f4xx_it.c}.82.3" 0 0 1 "" 0 "" 0
-Bp1=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\stm32f4xx_it.c}.69.3" 0 0 1 "" 0 "" 0
+Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\stm32f4xx_it.c}.84.3" 0 0 1 "" 0 "" 0
+Bp1=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\User\APP\stm32f4xx_it.c}.71.3" 0 0 1 "" 0 "" 0
 Count=2
 [Aliases]
-Count=0
+A0=_ "F:\6dof\zl-dev\Micrium\System\uCOS-II\Ports\ARM-Cortex-M4\Generic\IAR\os_cpu_a.asm" ""
+A1=_ "F:\6dof\zl-dev\Micrium\System\uCOS-II\Source\os_task.c" ""
+A2=_ "F:\6dof\zl-dev\Micrium\User\APP\app.c" ""
+Count=3
 SuppressDialog=0

@@ -719,7 +719,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>F:\6dof\zl-dev\Micrium\User\BSP\IAR\stm32f405xx_flash.icf</state>
+          <state>$PROJ_DIR$\..\User\BSP\IAR\stm32f405xx_flash.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>

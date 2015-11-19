@@ -32,6 +32,8 @@
 #include "ucos_ii.h"
 #include "drivers.h"
 #include "ch378.h"
+#include<string.h>
+
 /** @addtogroup Template_Project
   * @{
   */
@@ -175,13 +177,16 @@ void USART2_IRQHandler(void)
 #define RECV_STA_WAIT1ST	0x01
 #define RECV_STA_WAIT2ND	0x02
 #define RECV_STA_DMA		0x03
+#define RECV_STA_WAITDAT	0x04
+
 
 static uint8_t recv_sta = RECV_STA_WAIT1ST;
 
 void USART3_IRQHandler(void)
 {
 	uint8_t ushTemp;
-	
+	static uint8_t data_cnt;
+	static uint16_t data_buf[4];
 	OSIntEnter();
 	
 	if(USART_GetFlagStatus(USART3, USART_FLAG_ORE) != RESET)
@@ -216,11 +221,36 @@ void USART3_IRQHandler(void)
 			break;
 			case RECV_STA_WAIT2ND:
 				if((ushTemp&0xfc) == 0xa8){
-					 recv_sta = RECV_STA_DMA;
-					 DMA_Cmd(DMA1_Stream1,ENABLE);
-					 USART_ITConfig(USART3,USART_IT_RXNE,DISABLE); 
+					 recv_sta = RECV_STA_WAITDAT;
+					 data_cnt = 0;
+					 //DMA_Cmd(DMA1_Stream1,ENABLE);
+					 //USART_ITConfig(USART3,USART_IT_RXNE,DISABLE); 
+					 enc_value_ext[0] = ushTemp ;
 					 
 				}
+			break;
+			case RECV_STA_WAITDAT:
+				if(data_cnt == 0)
+					data_buf[0] =  ushTemp << 8;
+				if(data_cnt == 1)
+					data_buf[0] |=  ushTemp ;
+				if(data_cnt == 2)
+					data_buf[1] =  ushTemp << 8;
+				if(data_cnt == 3)
+					data_buf[1] |=  ushTemp ;
+				if(data_cnt == 4)
+					data_buf[2] =  ushTemp << 8;
+				if(data_cnt == 5)
+					data_buf[2] |=  ushTemp ;
+				if(data_cnt == 6)
+					data_buf[3] =  ushTemp << 8;
+				if(data_cnt == 7){
+					data_buf[3] |=  ushTemp ;
+					memcpy(enc_value_ext+1, data_buf, 8 );
+					recv_sta = RECV_STA_WAIT1ST;
+				}
+				
+				data_cnt++;
 			break;
 			default:
 				recv_sta = RECV_STA_WAIT1ST;
